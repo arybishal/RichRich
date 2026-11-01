@@ -45,7 +45,7 @@ $env:ANDROID_SDK_ROOT = "C:\Android\Sdk"
 $env:JAVA_HOME = "C:\Program Files\Microsoft\jdk-21.0.13.21-hotspot"
 
 # Execute Unity batchmode release build
-$unityExe = "C:\Program Files\Unity\Hub\Editor\6000.0.35f1\Editor\Unity.exe"
+$unityExe = "D:\unity6\Editor\Unity.exe"
 $projectPath = "D:\Webapp\RichyRich\RichRich_Unity"
 $outputPath = "D:\Webapp\RichyRich\Builds\Android\RichRich-v0.1.0-android-arm64.apk"
 $logPath = "D:\Webapp\RichyRich\Builds\Android\build.log"

@@ -116,7 +116,7 @@ RichRich includes an automated, headless build script located at `RichRich_Unity
 
 ### One-Line Headless Release Build Command
 ```powershell
-$unityExe = "C:\Program Files\Unity\Hub\Editor\6000.0.35f1\Editor\Unity.exe"
+$unityExe = "D:\unity6\Editor\Unity.exe"
 & $unityExe -batchmode -quit `
   -projectPath "D:\Webapp\RichyRich\RichRich_Unity" `
   -executeMethod RichRich.Editor.RichRichBuilder.BuildAndroidRelease `

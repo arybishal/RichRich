@@ -41,7 +41,8 @@ RichRich has evolved from a simple tap-to-earn prototype into an authentic life,
 | System Component | Detected Status | Notes |
 |---|---|---|
 | **Unity CLI Version** | `1.0.0-beta.5` | Installed at `C:\Users\ibishalaryal\AppData\Local\Unity\bin\unity.exe` |
-| **Project Target Editor** | `6000.0.35f1` (Unity 6 LTS) | Specified in `RichRich_Unity/ProjectSettings/ProjectVersion.txt` |
+| **Project Target Editor** | `6000.0.35f1` (Unity 6 LTS) | Installed at `D:\unity6\Editor\Unity.exe` |
+| **Android Build Support** | Installed & Verified | `D:\unity6\Editor\Data\PlaybackEngines\AndroidPlayer` (arm64-v8a, il2cpp) |
 | **Android SDK** | `C:\Android\Sdk` | Build-tools 34.0.0, 35.0.0, 36.0.0; Platforms android-34, 35, 36 |
 | **Android NDK** | `C:\Android\Sdk\ndk\28.2.13676358` | NDK Version 28.2 |
 | **Java Development Kit** | OpenJDK 17.0.20 | `C:\Program Files\Microsoft\jdk-17.0.20.101-hotspot` (`JAVA_HOME`) |
@@ -75,7 +76,7 @@ The runtime game startup flow is wired in [`GameBootstrapper.cs`](file:///D:/Web
 ### 4.1 Headless Build Execution
 Once Unity Editor 6000.0.35f1 is ready on the host, the release APK is compiled deterministically with:
 ```powershell
-$unityExe = "C:\Program Files\Unity\Hub\Editor\6000.0.35f1\Editor\Unity.exe"
+$unityExe = "D:\unity6\Editor\Unity.exe"
 & $unityExe -batchmode -quit `
   -projectPath "D:\Webapp\RichyRich\RichRich_Unity" `
   -executeMethod RichRich.Editor.RichRichBuilder.BuildAndroidRelease `
