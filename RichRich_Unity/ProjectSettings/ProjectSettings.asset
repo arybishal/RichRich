@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!129 &1
+PlayerSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 26
+  productName: RichRich
+  companyName: OriginalGames
+  defaultInterfaceOrientation: 1
+  allowedAutoRotatePortrait: 1
+  allowedAutoRotatePortraitUpsideDown: 0
+  allowedAutoRotateLandscapeRight: 0
+  allowedAutoRotateLandscapeLeft: 0
+  useOSAutoRotation: 0
+  targetDevice: 0
+  applicationIdentifier:
+    Android: com.original.richrich
+  buildNumber:
+    Android: 1
+  AndroidMinSdkVersion: 28
+  AndroidTargetSdkVersion: 35
+  AndroidTargetArchitectures: 2
+  scriptingBackend:
+    Android: 1
+  stripEngineCode: 1
