@@ -49,6 +49,28 @@ namespace RichRich.Presentation.Views
         [SerializeField] private Button _lifestyleOpenButton;
         [SerializeField] private GameObject _lifestyleModalRoot;
 
+        [Header("Commercial Business Navigation & Modals")]
+        [SerializeField] private Button _businessMarketplaceOpenButton;
+        [SerializeField] private GameObject _businessMarketplaceModalRoot;
+
+        [SerializeField] private Button _businessDashboardOpenButton;
+        [SerializeField] private GameObject _businessDashboardModalRoot;
+
+        [SerializeField] private Button _autoRepairOpenButton;
+        [SerializeField] private GameObject _autoRepairModalRoot;
+
+        [SerializeField] private Button _convenienceStoreOpenButton;
+        [SerializeField] private GameObject _convenienceStoreModalRoot;
+
+        [SerializeField] private Button _digitalAgencyOpenButton;
+        [SerializeField] private GameObject _digitalAgencyModalRoot;
+
+        [SerializeField] private Button _businessEmployeeOpenButton;
+        [SerializeField] private GameObject _businessEmployeeModalRoot;
+
+        [SerializeField] private Button _businessFinanceOpenButton;
+        [SerializeField] private GameObject _businessFinanceModalRoot;
+
         [Header("Settings")]
         [SerializeField] private Button _settingsOpenButton;
         [SerializeField] private GameObject _settingsModalRoot;
@@ -99,6 +121,41 @@ namespace RichRich.Presentation.Views
             if (_lifestyleOpenButton != null && _lifestyleModalRoot != null)
             {
                 _lifestyleOpenButton.onClick.AddListener(() => _lifestyleModalRoot.SetActive(true));
+            }
+
+            if (_businessMarketplaceOpenButton != null && _businessMarketplaceModalRoot != null)
+            {
+                _businessMarketplaceOpenButton.onClick.AddListener(() => _businessMarketplaceModalRoot.SetActive(true));
+            }
+
+            if (_businessDashboardOpenButton != null && _businessDashboardModalRoot != null)
+            {
+                _businessDashboardOpenButton.onClick.AddListener(() => _businessDashboardModalRoot.SetActive(true));
+            }
+
+            if (_autoRepairOpenButton != null && _autoRepairModalRoot != null)
+            {
+                _autoRepairOpenButton.onClick.AddListener(() => _autoRepairModalRoot.SetActive(true));
+            }
+
+            if (_convenienceStoreOpenButton != null && _convenienceStoreModalRoot != null)
+            {
+                _convenienceStoreOpenButton.onClick.AddListener(() => _convenienceStoreModalRoot.SetActive(true));
+            }
+
+            if (_digitalAgencyOpenButton != null && _digitalAgencyModalRoot != null)
+            {
+                _digitalAgencyOpenButton.onClick.AddListener(() => _digitalAgencyModalRoot.SetActive(true));
+            }
+
+            if (_businessEmployeeOpenButton != null && _businessEmployeeModalRoot != null)
+            {
+                _businessEmployeeOpenButton.onClick.AddListener(() => _businessEmployeeModalRoot.SetActive(true));
+            }
+
+            if (_businessFinanceOpenButton != null && _businessFinanceModalRoot != null)
+            {
+                _businessFinanceOpenButton.onClick.AddListener(() => _businessFinanceModalRoot.SetActive(true));
             }
 
             if (_settingsOpenButton != null && _settingsModalRoot != null)

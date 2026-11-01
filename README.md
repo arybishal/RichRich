@@ -7,7 +7,7 @@ Designed with clean-room engineering, 100% offline single-player persistence, an
 ---
 
 ## Technical Specifications
-- **Package ID:** `com.original.richrich`
+- **Package ID:** `com.bishal.richrich`
 - **Platform:** Android (Portrait, Min SDK 28, Target SDK 35, ARM64)
 - **Engine Baseline:** Unity 6 LTS (URP, IL2CPP)
 - **Architecture:** Clean Architecture with decoupled Domain, Application, and Presentation layers
@@ -103,14 +103,35 @@ dotnet test tests/RichRich.Tests/RichRich.Tests.csproj
 
 ---
 
-## Unity Editor Setup & Build Instructions
+## Android Build & Release Pipeline
 
-1. Open **Unity Hub**.
-2. Click **Add project from disk** and select `RichyRich/RichRich_Unity`.
-3. Open with **Unity 6 LTS** (or compatible 6000.x editor version).
-4. Select `File -> Open Scene -> Assets/Scenes/MainGameplay.unity`.
-5. In `File -> Build Settings`:
-   - Target Platform: **Android**
-   - Texture Compression: **ASTC**
-   - Run Device: Select connected Android device (via ADB)
-6. Click **Build and Run** to produce and install `RichRich.apk`.
+RichRich includes an automated, headless build script located at `RichRich_Unity/Assets/Scripts/Editor/RichRichBuilder.cs`.
+
+### Build Specifications
+- **Package Identifier:** `com.bishal.richrich`
+- **Application Version:** `0.1.0` (Bundle Version Code: `1`)
+- **Target Platform:** Android (Portrait)
+- **Scripting Backend:** IL2CPP (ARM64 `arm64-v8a`)
+- **API Target:** Min SDK 28 (Android 9.0 Pie), Target SDK 35 (Android 15)
+
+### One-Line Headless Release Build Command
+```powershell
+$unityExe = "C:\Program Files\Unity\Hub\Editor\6000.0.35f1\Editor\Unity.exe"
+& $unityExe -batchmode -quit `
+  -projectPath "D:\Webapp\RichyRich\RichRich_Unity" `
+  -executeMethod RichRich.Editor.RichRichBuilder.BuildAndroidRelease `
+  -buildOutput "D:\Webapp\RichyRich\Builds\Android\RichRich-v0.1.0-android-arm64.apk" `
+  -logFile "D:\Webapp\RichyRich\Builds\Android\build.log"
+```
+
+### Connected Physical Device Deployment (via ADB)
+```powershell
+# 1. Install release APK
+adb -s 3B15B800NRT00000 install -r "Builds/Android/RichRich-v0.1.0-android-arm64.apk"
+
+# 2. Launch main activity
+adb -s 3B15B800NRT00000 shell monkey -p com.bishal.richrich -c android.intent.category.LAUNCHER 1
+
+# 3. Stream real-time Android logcat
+adb -s 3B15B800NRT00000 logcat -s Unity:V RichRich:V AndroidRuntime:E
+```

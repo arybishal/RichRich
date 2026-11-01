@@ -1,0 +1,19 @@
+{
+    "name": "RichRich.Editor",
+    "rootNamespace": "RichRich.Editor",
+    "references": [
+        "RichRich.Domain",
+        "RichRich.Presentation"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

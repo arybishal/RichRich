@@ -244,3 +244,27 @@ To preserve game balance without requiring an online authentication server:
    $$\Delta t = \min(t_{\text{device\_now}} - t_{\text{last\_save}}, \text{MAX\_OFFLINE\_SECONDS})$$
 3. **Anti-Clock Manipulation Safeguard:** If $t_{\text{device\_now}} < t_{\text{last\_save}}$ (player rolled device clock backwards), reject time addition and flag safe reset to prevent backward-time exploits.
 4. **Zero Remote Dependencies:** Progression, business yields, and markets calculate entirely on-device, satisfying the strict restriction: **No login, no signup, no required backend**.
+
+---
+
+## 6. Android Build & Release Engineering Architecture
+
+### 6.1 Artifact Specifications
+- **Package Identifier:** `com.bishal.richrich`
+- **Application Version:** `0.1.0` (Version Code `1`)
+- **Target Platform:** Android (Portrait Only, Auto-rotation landscape disabled)
+- **Scripting Backend:** IL2CPP (Ahead-of-Time C++ compilation)
+- **Target Architecture:** `ARM64` (`arm64-v8a`)
+- **Managed Stripping Level:** Low (protects reflection and System.Text.Json serialization)
+- **Target Android SDK:** API Level 35 (Android 15)
+- **Minimum Android SDK:** API Level 28 (Android 9.0 Pie)
+
+### 6.2 Headless Build Pipeline
+RichRich employs an automated headless build method in `RichRich.Editor.RichRichBuilder.BuildAndroidRelease`:
+- Automated validation of Android SDK, NDK, and OpenJDK paths via `EditorPrefs`.
+- Deterministic release flags (`BuildOptions.None` without development or profiler hooks).
+- Automated resolution of Scene 0 (`Assets/Scenes/MainGameplay.unity`).
+- Batchmode error propagation to exit codes for CI/CD compatibility.
+
+### 6.3 Hardware Target Verification
+Target device: `CPH2691` (OnePlus Nord CE4 5G), Serial `3B15B800NRT00000`, running 64-bit ARM (`arm64-v8a`) on Android 17 / API 37. Compatible with Android Package Manager (`adb install -r`) and Android Launcher intent.

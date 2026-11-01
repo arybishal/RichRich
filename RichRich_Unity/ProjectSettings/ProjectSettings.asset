@@ -5,6 +5,7 @@ PlayerSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 26
   productName: RichRich
+  bundleVersion: 0.1.0
   companyName: OriginalGames
   defaultInterfaceOrientation: 1
   allowedAutoRotatePortrait: 1
@@ -14,7 +15,7 @@ PlayerSettings:
   useOSAutoRotation: 0
   targetDevice: 0
   applicationIdentifier:
-    Android: com.original.richrich
+    Android: com.bishal.richrich
   buildNumber:
     Android: 1
   AndroidMinSdkVersion: 28

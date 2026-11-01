@@ -2,7 +2,7 @@
 
 ## Target Specifications
 - **Product Name:** RichRich
-- **Package ID:** `com.original.richrich`
+- **Package ID:** `com.bishal.richrich`
 - **Platform:** Android (Portrait, Min SDK 28, Target SDK 35, ARM64)
 - **Engine Baseline:** Unity 6 LTS (URP, IL2CPP)
 - **Architecture:** Clean Architecture (Domain Models, Services, Persistence, UI Presentation)
@@ -100,6 +100,20 @@
 - [x] Schema Version 4 atomic persistence saves and restores all business systems with backward compatibility.
 - [x] 102 automated tests passing cleanly in .NET 8 CLI harness (100% pass rate).
 - [x] Milestone 4 Completion Report documented in `MILESTONE_4_REPORT.md`.
+
+---
+
+## Milestone: First Android APK Build, Release & Device Validation
+
+| Task ID | Task Description | Scope / Subsystems | Status | Deliverables |
+| :--- | :--- | :--- | :--- | :--- |
+| **REL-01** | Environment Audit & Verification | Unity version, Android SDK/NDK, OpenJDK 17, ADB CLI, physical device, GitHub CLI | **Completed** | `ANDROID_RELEASE_REPORT.md`, `DEVICE_VALIDATION_REPORT.md` |
+| **REL-02** | Automated Release Build Pipeline | Headless batchmode build script, ARM64 target, IL2CPP backend, API 28-35 | **Completed** | `RichRichBuilder.cs`, `RichRich.Editor.asmdef`, `EditorBuildSettings.asset` |
+| **REL-03** | Android Package Configuration | App name `RichRich`, Package ID `com.bishal.richrich`, v0.1.0, Portrait lock | **Completed** | `ProjectSettings.asset`, `RichRichBuilder.cs` |
+| **REL-04** | Runtime Scene & UI View Wiring | Bind all 11 views/controllers in GameBootstrapper and MainHUDView | **Completed** | `GameBootstrapper.cs`, `MainHUDView.cs` |
+| **REL-05** | Pre-Build Automated Test Suite | Run all 102 automated tests across domain and presentation | **Completed** | 102/102 passing (100% pass rate) in 432 ms |
+| **REL-06** | Hardware Device Target Probing | ADB communication, chipset architecture, OS version on OnePlus Nord CE4 | **Completed** | Telemetry in `DEVICE_VALIDATION_REPORT.md` (`CPH2691`, `arm64-v8a`, Android 17 / API 37) |
+| **REL-07** | Release Engineering Documentation | Build guide, release notes, hardware validation matrix | **Completed** | `ANDROID_BUILD_GUIDE.md`, `ANDROID_RELEASE_REPORT.md`, `DEVICE_VALIDATION_REPORT.md` |
 - [ ] Validated on real Android hardware via ADB (Deferred: No physical ADB device connected).
 - [x] Wallet currency operates strictly in integer minor-units (`long` cents).
 - [x] Configurable starting cash: Hard ($1,000), Standard ($3,000), Comfortable ($5,000).

@@ -20,9 +20,37 @@ namespace RichRich.Presentation.Views
         [SerializeField] private BusinessTaskView _taskView;
         [SerializeField] private SettingsModalView _settingsView;
 
+        [Header("Life & Career Progression Views")]
+        [SerializeField] private JobBoardView _jobBoardView;
+        [SerializeField] private EducationCatalogueView _educationView;
+        [SerializeField] private HousingCatalogueView _housingView;
+        [SerializeField] private LifestyleStatusView _lifestyleView;
+
+        [Header("Commercial Enterprise Views")]
+        [SerializeField] private BusinessMarketplaceView _marketplaceView;
+        [SerializeField] private BusinessDashboardView _dashboardView;
+        [SerializeField] private AutoRepairView _autoRepairView;
+        [SerializeField] private ConvenienceStoreView _convenienceStoreView;
+        [SerializeField] private DigitalAgencyView _digitalAgencyView;
+        [SerializeField] private BusinessEmployeeView _employeeView;
+        [SerializeField] private BusinessFinanceView _financeView;
+
         public LifeSimulationCoordinator LifeCoordinator { get; private set; }
         public LifeSimulationHUDController LifeHUDController { get; private set; }
         public GameSessionCoordinator LegacyCoordinator { get; private set; }
+
+        // Controllers
+        public JobBoardController JobBoardController { get; private set; }
+        public EducationCatalogueController EducationController { get; private set; }
+        public HousingCatalogueController HousingController { get; private set; }
+        public LifestyleStatusController LifestyleController { get; private set; }
+        public BusinessMarketplaceController MarketplaceController { get; private set; }
+        public BusinessDashboardController DashboardController { get; private set; }
+        public AutoRepairController AutoRepairController { get; private set; }
+        public ConvenienceStoreController ConvenienceStoreController { get; private set; }
+        public DigitalAgencyController DigitalAgencyController { get; private set; }
+        public BusinessEmployeeController EmployeeController { get; private set; }
+        public BusinessFinanceController FinanceController { get; private set; }
 
         private void Awake()
         {
@@ -46,6 +74,41 @@ namespace RichRich.Presentation.Views
             {
                 _hudView.Bind(LifeHUDController);
             }
+
+            // Life & Career Progression Subsystems
+            JobBoardController = new JobBoardController(LifeCoordinator);
+            if (_jobBoardView != null) _jobBoardView.Bind(JobBoardController);
+
+            EducationController = new EducationCatalogueController(LifeCoordinator);
+            if (_educationView != null) _educationView.Bind(EducationController);
+
+            HousingController = new HousingCatalogueController(LifeCoordinator);
+            if (_housingView != null) _housingView.Bind(HousingController);
+
+            LifestyleController = new LifestyleStatusController(LifeCoordinator);
+            if (_lifestyleView != null) _lifestyleView.Bind(LifestyleController);
+
+            // Commercial Business Subsystems
+            MarketplaceController = new BusinessMarketplaceController(LifeCoordinator);
+            if (_marketplaceView != null) _marketplaceView.Bind(MarketplaceController);
+
+            DashboardController = new BusinessDashboardController(LifeCoordinator);
+            if (_dashboardView != null) _dashboardView.Bind(DashboardController);
+
+            AutoRepairController = new AutoRepairController(LifeCoordinator);
+            if (_autoRepairView != null) _autoRepairView.Bind(AutoRepairController);
+
+            ConvenienceStoreController = new ConvenienceStoreController(LifeCoordinator);
+            if (_convenienceStoreView != null) _convenienceStoreView.Bind(ConvenienceStoreController);
+
+            DigitalAgencyController = new DigitalAgencyController(LifeCoordinator);
+            if (_digitalAgencyView != null) _digitalAgencyView.Bind(DigitalAgencyController);
+
+            EmployeeController = new BusinessEmployeeController(LifeCoordinator);
+            if (_employeeView != null) _employeeView.Bind(EmployeeController);
+
+            FinanceController = new BusinessFinanceController(LifeCoordinator);
+            if (_financeView != null) _financeView.Bind(FinanceController);
 
             // Legacy business / shop views wired through session coordinator if present in scene
             var timeProvider = new SystemTimeProvider();
