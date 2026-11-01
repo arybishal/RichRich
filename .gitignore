@@ -24,3 +24,12 @@ assets/bin/
 Thumbs.db
 Desktop.ini
 .DS_Store
+
+# Unity editor and cache
+[Ll]ogs/
+**/[Ll]ogs/
+[Uu]ser[Ss]ettings/
+**/[Uu]ser[Ss]ettings/
+.utmp/
+**/.utmp/
+

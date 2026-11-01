@@ -1,6 +1,6 @@
 using System;
 using System.IO;
-using System.Text.Json;
+using Newtonsoft.Json;
 
 namespace RichRich.Domain.Persistence
 {
@@ -23,10 +23,10 @@ namespace RichRich.Domain.Persistence
         public string BackupPath => Path.Combine(StorageDirectory, "richrich_save.backup.json");
         public string TempPath => Path.Combine(StorageDirectory, "richrich_save.tmp");
 
-        private static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions
+        private static readonly JsonSerializerSettings JsonSettings = new JsonSerializerSettings
         {
-            WriteIndented = true,
-            PropertyNameCaseInsensitive = true
+            Formatting = Formatting.Indented,
+            NullValueHandling = NullValueHandling.Ignore
         };
 
         public event Action<string> OnLogWarning;
@@ -45,7 +45,7 @@ namespace RichRich.Domain.Persistence
         {
             if (data == null) throw new ArgumentNullException(nameof(data));
 
-            string json = JsonSerializer.Serialize(data, JsonOptions);
+            string json = JsonConvert.SerializeObject(data, JsonSettings);
 
             // 1. Write staged content to temporary file
             File.WriteAllText(TempPath, json);
@@ -64,7 +64,11 @@ namespace RichRich.Domain.Persistence
             }
 
             // 3. Atomically replace primary save with staged file
-            File.Move(TempPath, PrimaryPath, overwrite: true);
+            if (File.Exists(PrimaryPath))
+            {
+                File.Delete(PrimaryPath);
+            }
+            File.Move(TempPath, PrimaryPath);
         }
 
         public SaveData Load()
@@ -77,7 +81,7 @@ namespace RichRich.Domain.Persistence
                     string json = File.ReadAllText(PrimaryPath);
                     if (!string.IsNullOrWhiteSpace(json))
                     {
-                        var data = JsonSerializer.Deserialize<SaveData>(json, JsonOptions);
+                        var data = JsonConvert.DeserializeObject<SaveData>(json, JsonSettings);
                         if (data != null && data.SchemaVersion >= 1)
                         {
                             return data;
@@ -98,7 +102,7 @@ namespace RichRich.Domain.Persistence
                     string json = File.ReadAllText(BackupPath);
                     if (!string.IsNullOrWhiteSpace(json))
                     {
-                        var data = JsonSerializer.Deserialize<SaveData>(json, JsonOptions);
+                        var data = JsonConvert.DeserializeObject<SaveData>(json, JsonSettings);
                         if (data != null && data.SchemaVersion >= 1)
                         {
                             OnLogWarning?.Invoke("Successfully recovered player save state from backup file.");

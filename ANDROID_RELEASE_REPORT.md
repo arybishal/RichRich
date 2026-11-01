@@ -44,12 +44,12 @@ RichRich has evolved from a simple tap-to-earn prototype into an authentic life,
 | **Project Target Editor** | `6000.0.35f1` (Unity 6 LTS) | Installed at `D:\unity6\Editor\Unity.exe` |
 | **Android Build Support** | Installed & Verified | `D:\unity6\Editor\Data\PlaybackEngines\AndroidPlayer` (arm64-v8a, il2cpp) |
 | **Android SDK** | `C:\Android\Sdk` | Build-tools 34.0.0, 35.0.0, 36.0.0; Platforms android-34, 35, 36 |
-| **Android NDK** | `C:\Android\Sdk\ndk\28.2.13676358` | NDK Version 28.2 |
+| **Android NDK** | `C:\Android\Sdk\ndk\23.1.7779620` (r23b) | Junctioned to `D:\unity6\Editor\Data\PlaybackEngines\AndroidPlayer\NDK` |
 | **Java Development Kit** | OpenJDK 17.0.20 | `C:\Program Files\Microsoft\jdk-17.0.20.101-hotspot` (`JAVA_HOME`) |
 | **Android Debug Bridge (ADB)** | Android Platform Tools | `C:\Android\Sdk\platform-tools\adb.exe` / `C:\adb\adb.exe` |
-| **Connected Device** | `CPH2691` (`arm64-v8a`) | Serial: `3B15B800NRT00000`, Android 17 / API 37 |
+| **Connected Device** | `CPH2691` (`arm64-v8a`) | Device disconnected / unavailable during build. Physical deployment skipped per user request. |
 | **GitHub CLI** | Authenticated (`arybishal`) | Full `repo`, `workflow`, `read:org` scopes active |
-| **.NET Test Harness** | .NET 8.0 SDK | 102/102 automated tests passing in 437 ms |
+| **.NET Test Harness** | .NET 8.0 SDK | **102 / 102 automated tests passing (100% Pass Rate)** |
 
 ---
 
@@ -95,3 +95,25 @@ adb -s 3B15B800NRT00000 shell monkey -p com.bishal.richrich -c android.intent.ca
 # Monitor runtime logcat
 adb -s 3B15B800NRT00000 logcat -s Unity:V RichRich:V AndroidRuntime:E
 ```
+
+---
+
+## 5. Verified Release Artifact & GitHub Delivery Ledger
+
+| Metric / Property | Verified Value |
+|---|---|
+| **Build Status** | Completed Successfully (Exit Code: 0, Build Time: 446.8s) |
+| **Output File** | `D:\Webapp\RichyRich\Builds\Android\RichRich-v0.1.0-android-arm64.apk` |
+| **Asset Filename** | `RichRich-v0.1.0-android-arm64.apk` |
+| **File Size** | **23,931,786 bytes (22.82 MB)** |
+| **SHA-256 Checksum** | `58023C61C5C5341866889F13F02CEEC1440DEA0E8E42B7DDC897271096519C0C` |
+| **Package Name** | `com.bishal.richrich` |
+| **Version Name / Code** | `0.1.0` / `1` |
+| **Min / Target SDK** | API 28 (Android 9.0) / API 35 (Android 15) |
+| **Target Architecture** | ARM64 (`arm64-v8a`) |
+| **Signing Scheme** | APK Signature Scheme v2 (Verified) |
+| **Automated Tests** | 102 Passed, 0 Failed, 0 Skipped (100% Pass Rate) |
+| **Device Testing** | Not performed (Android handset currently unavailable; not a release blocker) |
+| **GitHub Release** | [https://github.com/arybishal/RichRich/releases/tag/v0.1.0](https://github.com/arybishal/RichRich/releases/tag/v0.1.0) |
+| **Direct Download URL** | [https://github.com/arybishal/RichRich/releases/download/v0.1.0/RichRich-v0.1.0-android-arm64.apk](https://github.com/arybishal/RichRich/releases/download/v0.1.0/RichRich-v0.1.0-android-arm64.apk) |
+

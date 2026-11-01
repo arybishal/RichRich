@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using UnityEditor;
+using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
 using UnityEngine;
 
@@ -81,26 +82,38 @@ namespace RichRich.Editor
         public static void ConfigureAndroidPlayerSettings()
         {
             // Configure external tool paths if present
+            EditorPrefs.SetBool("JdkUseEmbedded", false);
+            EditorPrefs.SetBool("SdkUseEmbedded", false);
+            EditorPrefs.SetBool("NdkUseEmbedded", false);
             if (Directory.Exists(@"C:\Android\Sdk"))
             {
                 EditorPrefs.SetString("AndroidSdkRoot", @"C:\Android\Sdk");
+                EditorPrefs.SetString("AndroidSdkPath", @"C:\Android\Sdk");
             }
-            if (Directory.Exists(@"C:\Android\Sdk\ndk\28.2.13676358"))
+            string ndkDir = @"C:\Android\Sdk\ndk\23.1.7779620";
+            if (!Directory.Exists(ndkDir)) ndkDir = @"C:\Android\Sdk\ndk\27.2.12479018";
+            if (!Directory.Exists(ndkDir)) ndkDir = @"C:\Android\Sdk\ndk\28.2.13676358";
+            if (Directory.Exists(ndkDir))
             {
-                EditorPrefs.SetString("AndroidNdkRoot", @"C:\Android\Sdk\ndk\28.2.13676358");
+                EditorPrefs.SetString("AndroidNdkRoot", ndkDir);
+                EditorPrefs.SetString("AndroidNdkPath", ndkDir);
+                EditorPrefs.SetString("AndroidNDKRoot", ndkDir);
+                EditorPrefs.SetString("AndroidNDKPath", ndkDir);
+                EditorPrefs.SetString("NdkPath", ndkDir);
             }
             if (Directory.Exists(@"C:\Program Files\Microsoft\jdk-17.0.20.101-hotspot"))
             {
                 EditorPrefs.SetString("JdkPath", @"C:\Program Files\Microsoft\jdk-17.0.20.101-hotspot");
+                EditorPrefs.SetString("AndroidJavaPath", @"C:\Program Files\Microsoft\jdk-17.0.20.101-hotspot");
             }
 
             PlayerSettings.productName = ApplicationName;
             PlayerSettings.bundleVersion = VersionName;
             PlayerSettings.defaultInterfaceOrientation = UIOrientation.Portrait;
-            PlayerSettings.allowedAutoRotatePortrait = true;
-            PlayerSettings.allowedAutoRotatePortraitUpsideDown = false;
-            PlayerSettings.allowedAutoRotateLandscapeLeft = false;
-            PlayerSettings.allowedAutoRotateLandscapeRight = false;
+            PlayerSettings.allowedAutorotateToPortrait = true;
+            PlayerSettings.allowedAutorotateToPortraitUpsideDown = false;
+            PlayerSettings.allowedAutorotateToLandscapeLeft = false;
+            PlayerSettings.allowedAutorotateToLandscapeRight = false;
 
             // Application ID & Version code
             PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.Android, PackageIdentifier);
