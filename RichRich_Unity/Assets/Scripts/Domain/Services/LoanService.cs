@@ -20,6 +20,7 @@ namespace RichRich.Domain.Services
         public FinancialService FinancialService { get; }
         public CareerService CareerService { get; }
         public SimulationClock Clock { get; }
+        public BusinessService BusinessService { get; set; }
 
         public int CreditScore { get; private set; } = 650; // Standard baseline credit score (300-850)
 
@@ -50,11 +51,13 @@ namespace RichRich.Domain.Services
             FinancialService financialService,
             CareerService careerService,
             SimulationClock clock,
-            IEnumerable<LoanProduct> initialCatalog = null)
+            IEnumerable<LoanProduct> initialCatalog = null,
+            BusinessService businessService = null)
         {
             FinancialService = financialService ?? throw new ArgumentNullException(nameof(financialService));
             CareerService = careerService ?? throw new ArgumentNullException(nameof(careerService));
             Clock = clock ?? throw new ArgumentNullException(nameof(clock));
+            BusinessService = businessService;
 
             if (initialCatalog != null)
             {
@@ -87,6 +90,26 @@ namespace RichRich.Domain.Services
                     annualInterestRate: 0.12,
                     termMonths: 12,
                     requiredMinimumIncome: Currency.FromDollars(2200.00)
+                ),
+                new LoanProduct(
+                    "loan_business_starter",
+                    "Commercial Equipment & Starter Loan ($15,000)",
+                    Currency.FromDollars(15000.00),
+                    annualInterestRate: 0.10,
+                    termMonths: 24,
+                    requiredMinimumIncome: Currency.FromDollars(2000.00),
+                    isBusinessLoan: true,
+                    requiredBusinessLevel: 1
+                ),
+                new LoanProduct(
+                    "loan_business_expansion",
+                    "Commercial Enterprise Expansion Loan ($35,000)",
+                    Currency.FromDollars(35000.00),
+                    annualInterestRate: 0.09,
+                    termMonths: 36,
+                    requiredMinimumIncome: Currency.FromDollars(3500.00),
+                    isBusinessLoan: true,
+                    requiredBusinessLevel: 2
                 )
             };
         }
@@ -121,8 +144,30 @@ namespace RichRich.Domain.Services
                 return false;
             }
 
-            // Income / Debt-to-income check
-            Currency currentIncome = CareerService.CurrentMonthlySalary;
+            // Commercial business loan verification
+            if (product.IsBusinessLoan)
+            {
+                if (BusinessService == null || BusinessService.OwnedBusinesses.Count == 0)
+                {
+                    rejectionReason = "Commercial business loans require at least one active operating business.";
+                    return false;
+                }
+
+                if (product.RequiredBusinessLevel > 1 && !BusinessService.OwnedBusinesses.Any(b => b.Level >= product.RequiredBusinessLevel))
+                {
+                    rejectionReason = $"Commercial expansion loan requires at least one business operating at Level {product.RequiredBusinessLevel} or higher.";
+                    return false;
+                }
+            }
+
+            // Income / Debt-to-income check (considers both employment salary and positive business net profit)
+            long totalIncomeMinorUnits = CareerService.CurrentMonthlySalary.MinorUnits;
+            if (BusinessService != null && BusinessService.OwnedBusinesses.Count > 0)
+            {
+                totalIncomeMinorUnits += Math.Max(0, BusinessService.CalculateMonthlyNetProfit().MinorUnits);
+            }
+            Currency currentIncome = Currency.FromCents(totalIncomeMinorUnits);
+
             if (currentIncome < product.RequiredMinimumMonthlyIncome)
             {
                 rejectionReason = $"Monthly income of {currentIncome} does not meet required minimum of {product.RequiredMinimumMonthlyIncome}.";

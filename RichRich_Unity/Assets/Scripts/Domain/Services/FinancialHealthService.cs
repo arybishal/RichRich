@@ -14,20 +14,34 @@ namespace RichRich.Domain.Services
         public LivingExpenseService ExpenseService { get; }
         public CareerService CareerService { get; }
         public LoanService LoanService { get; }
+        public BusinessService BusinessService { get; set; }
 
         public FinancialHealthService(
             FinancialService financialService,
             LivingExpenseService expenseService,
             CareerService careerService,
-            LoanService loanService)
+            LoanService loanService,
+            BusinessService businessService = null)
         {
             FinancialService = financialService ?? throw new ArgumentNullException(nameof(financialService));
             ExpenseService = expenseService ?? throw new ArgumentNullException(nameof(expenseService));
             CareerService = careerService ?? throw new ArgumentNullException(nameof(careerService));
             LoanService = loanService ?? throw new ArgumentNullException(nameof(loanService));
+            BusinessService = businessService;
         }
 
-        public Currency ProjectedMonthlyIncome => CareerService.CurrentMonthlySalary;
+        public Currency ProjectedMonthlyIncome
+        {
+            get
+            {
+                long income = CareerService.CurrentMonthlySalary.MinorUnits;
+                if (BusinessService != null && BusinessService.OwnedBusinesses.Count > 0)
+                {
+                    income += Math.Max(0, BusinessService.CalculateMonthlyNetProfit().MinorUnits);
+                }
+                return Currency.FromCents(income);
+            }
+        }
         public Currency ProjectedMonthlyExpenses => ExpenseService.TotalMonthlyBudget + LoanService.TotalMonthlyInstallments;
         public long ProjectedNetMonthlyCashFlowCents => (long)ProjectedMonthlyIncome.MinorUnits - (long)ProjectedMonthlyExpenses.MinorUnits;
         public bool HasNegativeCashFlow => ProjectedNetMonthlyCashFlowCents < 0;

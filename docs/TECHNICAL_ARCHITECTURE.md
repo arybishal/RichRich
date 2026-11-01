@@ -64,15 +64,23 @@ The game follows a strict **Clean Architecture / Domain-Driven Design (DDD)** pa
 7. **EducationService (`EducationService.cs`):** Manages workshops, professional certificates, and higher education degree programs (Business Diploma, CS Degree), tuition deductions, study pacing (Part-Time/Full-Time), qualifications, and skill acquisition.
 8. **LifestyleService (`LifestyleService.cs`):** Manages player energy pool (0-100), work shift & study energy demands, fatigue levels, rest breaks, and housing-linked overnight sleep recovery.
 9. **LoanService (`LoanService.cs`):** Underwrites loans ($5K / $10K), enforces 12% APR amortization, deducts scheduled installments, calculates principal/interest splits, and manages credit scoring.
-10. **FinancialHealthService (`FinancialHealthService.cs`):** Evaluates player solvency across 6 formal states (Healthy, Stressed, Crisis, Insolvent, Bankrupt, Restructuring).
-11. **LifeSimulationCoordinator (`LifeSimulationCoordinator.cs`):** Central master orchestrator tying all services, clock progression, and persistence into a cohesive headless simulation.
+10. **FinancialHealthService (`FinancialHealthService.cs`):** Evaluates player solvency across 6 formal states (Healthy, Stressed, Crisis, Insolvent, Bankrupt, Restructuring), integrating commercial business profits into projected cash flow.
+11. **BusinessService (`BusinessService.cs`):** Master commercial enterprise engine managing enterprise catalogs, acquisitions, service bays, retail inventory, client contracts, staff recruitment, scheduled payroll, and facility valuations.
+12. **LifeSimulationCoordinator (`LifeSimulationCoordinator.cs`):** Central master orchestrator tying all services, clock progression, and persistence into a cohesive headless simulation.
 
 ### 2.2 Presentation & View-Model Controllers
-1. **JobBoardController (`JobBoardController.cs`):** Decoupled presentation controller for track filtering, job inspection, applications, promotion tracking, and career profiles.
-2. **EducationCatalogueController (`EducationCatalogueController.cs`):** Presentation controller for programme filtering, pace toggles, tuition checks, and live degree progression.
-3. **HousingCatalogueController (`HousingCatalogueController.cs`):** Presentation controller for browsing 5 accommodation tiers, lease signing, and comfort comparisons.
-4. **LifestyleStatusController (`LifestyleStatusController.cs`):** Presentation controller for energy meters, fatigue indicators, rest actions, and sleep transitions.
-5. **LifeSimulationHUDController (`LifeSimulationHUDController.cs`):** View-model controller for core HUD metrics, time controls, and live status badges.
+1. **BusinessMarketplaceController (`BusinessMarketplaceController.cs`):** View-model controller for browsing commercial opportunities, inspecting acquisition costs, and establishing commercial ventures.
+2. **BusinessDashboardController (`BusinessDashboardController.cs`):** View-model controller for portfolio summary, enterprise performance, facility upgrades, and business liquidations.
+3. **AutoRepairController (`AutoRepairController.cs`):** View-model controller for workshop service bay allocation, repair queue, vehicle intake, and delivery payouts.
+4. **ConvenienceStoreController (`ConvenienceStoreController.cs`):** View-model controller for inventory stock lines, wholesale re-orders, customer pricing, and retail sales metrics.
+5. **DigitalAgencyController (`DigitalAgencyController.cs`):** View-model controller for corporate client contracts, labor hour contributions, deadlines, and project payouts.
+6. **BusinessEmployeeController (`BusinessEmployeeController.cs`):** View-model controller for candidate recruitment, staff rosters, productivity boosts, and monthly payroll.
+7. **BusinessFinanceController (`BusinessFinanceController.cs`):** View-model controller for commercial loans, isolated business P&L accounting, and debt servicing.
+8. **JobBoardController (`JobBoardController.cs`):** Decoupled presentation controller for track filtering, job inspection, applications, promotion tracking, and career profiles.
+9. **EducationCatalogueController (`EducationCatalogueController.cs`):** Presentation controller for programme filtering, pace toggles, tuition checks, and live degree progression.
+10. **HousingCatalogueController (`HousingCatalogueController.cs`):** Presentation controller for browsing 5 accommodation tiers, lease signing, and comfort comparisons.
+11. **LifestyleStatusController (`LifestyleStatusController.cs`):** Presentation controller for energy meters, fatigue indicators, rest actions, and sleep transitions.
+12. **LifeSimulationHUDController (`LifeSimulationHUDController.cs`):** View-model controller for core HUD metrics, time controls, and live status badges.
 
 ---
 

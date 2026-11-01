@@ -173,8 +173,12 @@ The player's status is evaluated across 6 formal states:
 | **Health** | 6-State Health Evaluator (`FinancialHealthService.cs`) | **Implemented** | Healthy $\rightarrow$ Stressed $\rightarrow$ Crisis $\rightarrow$ Insolvent $\rightarrow$ Bankrupt |
 | **UI** | Life Simulation HUD (`LifeSimulationHUDController.cs`)| **Implemented** | Replaces tap button with Cash, Net Worth, Date, Cash Flow, Status |
 | **UI** | Unity HUD View (`MainHUDView.cs`) | **Implemented** | Binds Life HUD to Unity UI Text/Buttons |
-| **Career** | Expanded 20+ Career Pathways | *Designed* | Planned for Milestone 3 |
-| **Education** | University Degrees & Online Modules | *Designed* | Planned for Milestone 3 |
-| **Property** | Real Estate Acquisition & Mortgages | *Designed* | Planned for Milestone 4 |
-| **Business** | Commercial Business Startups (Full 14 Tiers) | *Partially Implemented*| Auto Repair Shop implemented; remaining 13 planned |
-| **Testing** | Android Physical Hardware Deployment | **Deferred / Blocked** | No physical phone attached to ADB; Unity Editor binary not on host |
+| **Career** | Expanded Multi-Tier Career Ladders | **Implemented** | Retail (4 tiers), Tech (6 tiers), Business (5 tiers) with promotions |
+| **Education** | University Degrees & Online Modules | **Implemented** | Business Admin Diploma, Computer Science Degree, study pacing |
+| **Housing** | Housing Accommodations System | **Implemented** | 5 tiers, move-in deposits, landlord verification, anti-duplication rent |
+| **Lifestyle** | Energy & Fatigue Dynamics | **Implemented** | Energy pool (0-100), work/study drain, rest, housing sleep recovery |
+| **Business** | Commercial Business Framework | **Implemented** | Auto Repair, Convenience Store, Digital Agency with P&L and valuation |
+| **Staffing** | Human Resources & Staffing | **Implemented** | 6 employee roles, candidate pool recruitment, Day 30 monthly payroll |
+| **Credit** | Commercial Business Loans | **Implemented** | $15K starter and $35K expansion loans, underwriting on business profit |
+| **Property** | Real Estate Investment & Portfolios | *Designed* | Planned for Milestone 5 |
+| **Testing** | Android Physical Hardware Deployment | **Deferred / Blocked** | No physical phone attached to ADB; headless .NET 8 CLI harness verified |

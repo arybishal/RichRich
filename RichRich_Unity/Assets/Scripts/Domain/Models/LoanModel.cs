@@ -13,6 +13,8 @@ namespace RichRich.Domain.Models
         public double AnnualInterestRate { get; } // e.g. 0.12 for 12%
         public int TermMonths { get; }            // e.g. 12 months
         public Currency RequiredMinimumMonthlyIncome { get; }
+        public bool IsBusinessLoan { get; }
+        public int RequiredBusinessLevel { get; }
 
         public LoanProduct(
             string id,
@@ -20,7 +22,9 @@ namespace RichRich.Domain.Models
             Currency principal,
             double annualInterestRate = 0.12,
             int termMonths = 12,
-            Currency? requiredMinimumIncome = null)
+            Currency? requiredMinimumIncome = null,
+            bool isBusinessLoan = false,
+            int requiredBusinessLevel = 0)
         {
             Id = id ?? throw new ArgumentNullException(nameof(id));
             Name = name ?? throw new ArgumentNullException(nameof(name));
@@ -28,6 +32,8 @@ namespace RichRich.Domain.Models
             AnnualInterestRate = annualInterestRate;
             TermMonths = Math.Max(1, termMonths);
             RequiredMinimumMonthlyIncome = requiredMinimumIncome ?? Currency.FromDollars(800.00);
+            IsBusinessLoan = isBusinessLoan;
+            RequiredBusinessLevel = requiredBusinessLevel;
         }
 
         public Currency CalculateMonthlyInstallment()

@@ -18,16 +18,82 @@ namespace RichRich.Domain.Persistence
         public int LastPaidMonth { get; set; }
     }
 
+    [Serializable]
+    public class BusinessSaveSnapshot
+    {
+        public string Id { get; set; }
+        public string Name { get; set; }
+        public string Category { get; set; }
+        public bool IsOwned { get; set; }
+        public int Level { get; set; }
+        public int Reputation { get; set; }
+        public double Condition { get; set; }
+        public bool IsOpen { get; set; }
+        public int CompletedTasks { get; set; }
+    }
+
+    [Serializable]
+    public class EmployeeSaveSnapshot
+    {
+        public string Id { get; set; }
+        public string Name { get; set; }
+        public string BusinessId { get; set; }
+        public string Role { get; set; }
+        public long MonthlySalaryCents { get; set; }
+        public double Productivity { get; set; }
+        public int HiredMonth { get; set; }
+    }
+
+    [Serializable]
+    public class StoreProductSaveSnapshot
+    {
+        public string ProductId { get; set; }
+        public int StockOnHand { get; set; }
+        public long SellingPriceCents { get; set; }
+        public int TotalUnitsSold { get; set; }
+        public int MissedSalesDueToStockout { get; set; }
+    }
+
+    [Serializable]
+    public class AgencyProjectSaveSnapshot
+    {
+        public string ProjectId { get; set; }
+        public string Name { get; set; }
+        public string Category { get; set; }
+        public long ContractValueCents { get; set; }
+        public double RequiredHours { get; set; }
+        public double CompletedHours { get; set; }
+        public int DeadlineDay { get; set; }
+        public int RequiredReputation { get; set; }
+        public bool IsAccepted { get; set; }
+        public bool IsCompleted { get; set; }
+        public bool IsExpired { get; set; }
+    }
+
+    [Serializable]
+    public class AutoRepairJobSaveSnapshot
+    {
+        public string JobId { get; set; }
+        public string VehicleModel { get; set; }
+        public string Category { get; set; }
+        public long RevenueCents { get; set; }
+        public long PartsCostCents { get; set; }
+        public int DurationMinutes { get; set; }
+        public int ElapsedMinutes { get; set; }
+        public bool IsCompleted { get; set; }
+        public int AssignedBayIndex { get; set; }
+    }
+
     /// <summary>
     /// Versioned, portable save schema for RichRich Life & Wealth Simulation.
-    /// Schema Version 3 supports Career Ladders, Degrees, Housing Tiers, and Lifestyle Energy.
-    /// Backward-compatible with Schema 1 and Schema 2.
+    /// Schema Version 4 supports Entrepreneurship & Business Ownership (Auto Repair, Convenience Store, Digital Agency, Employees, Inventory, Contracts).
+    /// Backward-compatible with Schema 1, 2, and 3.
     /// Serializes to clean human-readable JSON with zero personal data.
     /// </summary>
     [Serializable]
     public class SaveData
     {
-        public int SchemaVersion { get; set; } = 3;
+        public int SchemaVersion { get; set; } = 4;
         public long CreatedAtUnix { get; set; }
         public long LastSavedUnix { get; set; }
 
@@ -66,6 +132,13 @@ namespace RichRich.Domain.Persistence
         // Lifestyle & Energy
         public int CurrentEnergy { get; set; } = 100;
 
+        // Entrepreneurship & Business Ownership (Schema 4)
+        public List<BusinessSaveSnapshot> Businesses { get; set; } = new List<BusinessSaveSnapshot>();
+        public List<EmployeeSaveSnapshot> Employees { get; set; } = new List<EmployeeSaveSnapshot>();
+        public List<StoreProductSaveSnapshot> StoreInventory { get; set; } = new List<StoreProductSaveSnapshot>();
+        public List<AgencyProjectSaveSnapshot> AgencyProjects { get; set; } = new List<AgencyProjectSaveSnapshot>();
+        public List<AutoRepairJobSaveSnapshot> ActiveRepairJobs { get; set; } = new List<AutoRepairJobSaveSnapshot>();
+
         // Legacy / Schema 1 Fields (Preserved for backwards compatibility)
         public int CurrentLevel { get; set; } = 1;
         public int Tickets { get; set; } = EconomyConfig.StartingTickets;
@@ -83,7 +156,7 @@ namespace RichRich.Domain.Persistence
             Currency startCash = GameStartConfig.GetStartingCash(difficulty);
             return new SaveData
             {
-                SchemaVersion = 3,
+                SchemaVersion = 4,
                 CreatedAtUnix = currentUnix,
                 LastSavedUnix = currentUnix,
                 Difficulty = difficulty.ToString(),
@@ -94,6 +167,11 @@ namespace RichRich.Domain.Persistence
                 OverdueLiabilitiesCents = 0L,
                 CreditScore = 650,
                 ActiveLoans = new List<LoanSaveSnapshot>(),
+                Businesses = new List<BusinessSaveSnapshot>(),
+                Employees = new List<EmployeeSaveSnapshot>(),
+                StoreInventory = new List<StoreProductSaveSnapshot>(),
+                AgencyProjects = new List<AgencyProjectSaveSnapshot>(),
+                ActiveRepairJobs = new List<AutoRepairJobSaveSnapshot>(),
                 CurrentJobId = null,
                 TotalMonthsWorked = 0,
                 CurrentJobTenureMonths = 0,

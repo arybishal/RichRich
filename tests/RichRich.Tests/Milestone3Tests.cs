@@ -506,7 +506,7 @@ namespace RichRich.Tests
 
             // Save state
             var saved = _coordinator.SaveCurrentState();
-            Assert.That(saved.SchemaVersion, Is.EqualTo(3));
+            Assert.That(saved.SchemaVersion, Is.GreaterThanOrEqualTo(3));
             Assert.That(saved.CurrentHousingTierId, Is.EqualTo("housing_one_bedroom"));
             Assert.That(saved.StudyPace, Is.EqualTo("FullTime"));
             Assert.That(saved.RetailExperienceMonths, Is.EqualTo(12));

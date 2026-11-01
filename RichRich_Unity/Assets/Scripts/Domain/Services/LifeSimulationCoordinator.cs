@@ -27,6 +27,7 @@ namespace RichRich.Domain.Services
         public CareerService CareerService { get; private set; }
         public LoanService LoanService { get; private set; }
         public LifestyleService LifestyleService { get; private set; }
+        public BusinessService BusinessService { get; private set; }
         public FinancialHealthService HealthService { get; private set; }
         public ISaveDataService SaveService { get; }
 
@@ -163,8 +164,79 @@ namespace RichRich.Domain.Services
             int energy = save.CurrentEnergy > 0 ? save.CurrentEnergy : 100;
             LifestyleService = new LifestyleService(Clock, CareerService, EducationService, HousingService, energy);
 
-            // 9. Financial Health Evaluator
-            HealthService = new FinancialHealthService(FinancialService, ExpenseService, CareerService, LoanService);
+            // 9. Entrepreneurship & Commercial Business Ownership
+            BusinessService = new BusinessService(FinancialService, Clock, CareerService);
+            LoanService.BusinessService = BusinessService;
+
+            // 10. Financial Health Evaluator
+            HealthService = new FinancialHealthService(FinancialService, ExpenseService, CareerService, LoanService, BusinessService);
+
+            // Restore Businesses
+            if (save.Businesses != null && save.Businesses.Count > 0)
+            {
+                foreach (var bSnap in save.Businesses)
+                {
+                    if (bSnap.IsOwned)
+                    {
+                        BusinessService.RestoreOwnedBusiness(bSnap.Id, bSnap.Level, bSnap.Reputation, (int)bSnap.Condition, bSnap.IsOpen, bSnap.CompletedTasks);
+                    }
+                }
+            }
+            else if (save.IsBusinessOwned)
+            {
+                // Schema 1/2/3 backwards compatibility
+                BusinessService.RestoreOwnedBusiness("auto_repair", save.BusinessLevel, 50, 100, true, save.BusinessTasksCompleted);
+            }
+
+            // Restore Employees
+            if (save.Employees != null && save.Employees.Count > 0)
+            {
+                foreach (var eSnap in save.Employees)
+                {
+                    if (Enum.TryParse(eSnap.Role, out EmployeeRole role))
+                    {
+                        var hireDate = eSnap.HiredMonth > 0 ? new GameDateTime(currentDate.Year, Math.Clamp(eSnap.HiredMonth, 1, 12), 1) : Clock.CurrentDate;
+                        var emp = new Employee(eSnap.Id, eSnap.Name, eSnap.BusinessId, role, Currency.FromCents(eSnap.MonthlySalaryCents), eSnap.Productivity, hireDate);
+                        BusinessService.RestoreEmployee(emp);
+                    }
+                }
+            }
+
+            // Restore Convenience Store inventory
+            if (save.StoreInventory != null && save.StoreInventory.Count > 0)
+            {
+                foreach (var pSnap in save.StoreInventory)
+                {
+                    BusinessService.RestoreStoreProduct(pSnap.ProductId, pSnap.StockOnHand, Currency.FromCents(pSnap.SellingPriceCents), pSnap.TotalUnitsSold, pSnap.MissedSalesDueToStockout);
+                }
+            }
+
+            // Restore Digital Agency client projects
+            if (save.AgencyProjects != null && save.AgencyProjects.Count > 0)
+            {
+                foreach (var prSnap in save.AgencyProjects)
+                {
+                    if (Enum.TryParse(prSnap.Category, out AgencyProjectCategory cat))
+                    {
+                        var proj = new ClientProject(
+                            prSnap.ProjectId,
+                            prSnap.Name,
+                            cat,
+                            (int)prSnap.RequiredHours,
+                            prSnap.DeadlineDay,
+                            Currency.FromCents(prSnap.ContractValueCents),
+                            reputationGain: prSnap.RequiredReputation,
+                            completedHours: (int)prSnap.CompletedHours,
+                            isAccepted: prSnap.IsAccepted,
+                            isCompleted: prSnap.IsCompleted,
+                            isFailed: prSnap.IsExpired
+                        );
+                        BusinessService.RestoreAgencyProject(proj);
+                    }
+                }
+            }
+
+            BusinessService.UpdateBalanceSheetAssets();
         }
 
         public void Tick(double deltaRealSeconds)
@@ -179,9 +251,10 @@ namespace RichRich.Domain.Services
 
         public SaveData SaveCurrentState()
         {
+            var autoRepair = BusinessService?.GetBusiness("auto_repair");
             var save = new SaveData
             {
-                SchemaVersion = 3,
+                SchemaVersion = 4,
                 CreatedAtUnix = _createdAtUnix != 0 ? _createdAtUnix : DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
                 LastSavedUnix = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
                 Difficulty = Difficulty.ToString(),
@@ -219,7 +292,69 @@ namespace RichRich.Domain.Services
                     OverdueAmountCents = l.OverdueAmount.MinorUnits,
                     DueDayOfMonth = l.DueDayOfMonth,
                     LastPaidMonth = l.LastPaidMonth
-                }).ToList()
+                }).ToList(),
+                Businesses = BusinessService?.AllBusinesses.Select(b => new BusinessSaveSnapshot
+                {
+                    Id = b.Id,
+                    Name = b.Name,
+                    Category = b.Category.ToString(),
+                    IsOwned = b.IsOwned,
+                    Level = b.Level,
+                    Reputation = b.Reputation,
+                    Condition = b.Condition,
+                    IsOpen = b.IsOpen,
+                    CompletedTasks = b.CompletedTasksCount
+                }).ToList() ?? new List<BusinessSaveSnapshot>(),
+                Employees = BusinessService?.HiredEmployees.Select(e => new EmployeeSaveSnapshot
+                {
+                    Id = e.Id,
+                    Name = e.Name,
+                    BusinessId = e.BusinessId,
+                    Role = e.Role.ToString(),
+                    MonthlySalaryCents = e.MonthlySalary.MinorUnits,
+                    Productivity = e.Productivity,
+                    HiredMonth = e.HireDate.Month
+                }).ToList() ?? new List<EmployeeSaveSnapshot>(),
+                StoreInventory = BusinessService?.ConvenienceStoreCatalog.Select(p => new StoreProductSaveSnapshot
+                {
+                    ProductId = p.Id,
+                    StockOnHand = p.StockOnHand,
+                    SellingPriceCents = p.SellingPrice.MinorUnits,
+                    TotalUnitsSold = p.UnitsSoldTotal,
+                    MissedSalesDueToStockout = p.MissedSalesTotal
+                }).ToList() ?? new List<StoreProductSaveSnapshot>(),
+                AgencyProjects = BusinessService?.AgencyProjects.Select(pr => new AgencyProjectSaveSnapshot
+                {
+                    ProjectId = pr.ProjectId,
+                    Name = pr.ClientName,
+                    Category = pr.Category.ToString(),
+                    ContractValueCents = pr.ContractPayment.MinorUnits,
+                    RequiredHours = pr.TotalHoursRequired,
+                    CompletedHours = pr.CompletedHours,
+                    DeadlineDay = pr.DeadlineDays,
+                    RequiredReputation = pr.ReputationGain,
+                    IsAccepted = pr.IsAccepted,
+                    IsCompleted = pr.IsCompleted,
+                    IsExpired = pr.IsFailed
+                }).ToList() ?? new List<AgencyProjectSaveSnapshot>(),
+                ActiveRepairJobs = BusinessService?.ServiceBays.Where(b => b.IsOccupied).Select(b => new AutoRepairJobSaveSnapshot
+                {
+                    JobId = b.CurrentJob.JobId,
+                    VehicleModel = b.CurrentJob.VehicleModel,
+                    Category = b.CurrentJob.Category.ToString(),
+                    RevenueCents = b.CurrentJob.CustomerPayment.MinorUnits,
+                    PartsCostCents = b.CurrentJob.PartsCost.MinorUnits,
+                    DurationMinutes = b.CurrentJob.RequiredMinutes,
+                    ElapsedMinutes = b.CurrentJob.ElapsedMinutes,
+                    IsCompleted = b.CurrentJob.IsCompleted,
+                    AssignedBayIndex = b.BayId
+                }).ToList() ?? new List<AutoRepairJobSaveSnapshot>(),
+                CurrentLevel = 1,
+                Tickets = EconomyConfig.StartingTickets,
+                BusinessId = "auto_repair",
+                IsBusinessOwned = autoRepair != null && autoRepair.IsOwned,
+                BusinessLevel = autoRepair != null ? autoRepair.Level : 1,
+                BusinessTasksCompleted = autoRepair != null ? autoRepair.CompletedTasksCount : 0
             };
 
             SaveService.Save(save);

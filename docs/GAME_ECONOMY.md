@@ -51,27 +51,27 @@ $$\text{Net Monthly Cash Flow} = \sum \text{Salaries} - \left( \sum \text{Living
 The player's aggregate passive income per hour is the sum of four discrete streams:
 $$\text{Total Passive Income} = I_{\text{business}} + I_{\text{rental}} + I_{\text{dividends}} + I_{\text{crypto\_yield}}$$
 
-### 3.1 Business Yields & ROI Modeling
-Each business delivers an hourly cash yield based on its initial investment and stage level:
+### 3.1 Commercial Enterprise Operations & P&L Modeling (Milestone 4)
+In Milestone 4, commercial businesses operate with full accounting P&L: Gross Revenue, Cost of Goods Sold (COGS), Operating Overhead, and Staff Payroll.
 
-| Business | Purchase Price ($) | Est. Base Income / Hr ($) | Est. Break-Even Time (Hrs) | Verification Status |
-| :--- | :--- | :--- | :--- | :--- |
-| **Store (Retail)** | $5,499.00 | $120.00 | ~45.8 | **Inferred** |
-| **Taxi Company** | $14,990.00 | $310.00 | ~48.3 | **Inferred** |
-| **Beauty Salon** | $29,990.00 | $580.00 | ~51.7 | **Inferred** |
-| **Delivery Company**| $29,990.00 | $600.00 | ~50.0 | **Inferred** |
-| **Manufacturing Plant**| $35,000.00 | $680.00 | ~51.5 | **Inferred** |
-| **Building Contractor**| $50,000.00 | $950.00 | ~52.6 | **Inferred** |
-| **Autorepair Shop**| $55,000.00 | $1,020.00 | ~53.9 | **Inferred** |
-| **Vet-Clinic** | $100,000.00 | $1,800.00 | ~55.5 | **Inferred** |
-| **Tech Company** | $355,000.00 | $6,200.00 | ~57.2 | **Inferred** |
-| **Hospital** | $500,000.00 | $8,500.00 | ~58.8 | **Inferred** |
-| **Film Studio** | $1,240,000.00 | $20,000.00 | ~62.0 | **Inferred** |
-| **Insurance Company**| $9,500,000.00 | $145,000.00 | ~65.5 | **Inferred** |
-| **MMA Organization**| $25,000,000.00 | $360,000.00 | ~69.4 | **Inferred** |
-| **Energy / Oil & Gas**| $990,000,000.00 | $13,500,000.00 | ~73.3 | **Inferred** |
+| Commercial Enterprise | Industry | Base Acquisition | Setup Cost | Daily Overhead | Starting Asset Valuation | Mechanics |
+| :--- | :--- | :---:| :---:| :---:| :---:| :--- |
+| **Auto Repair Workshop** | Automotive | $5,499.00 | $500.00 | $35.00/day | $5,499.00 | Service bays (1-3), vehicle repair queue, parts cost, job progress, delivery payouts |
+| **Corner Convenience Store**| Retail | $12,500.00 | $1,200.00 | $45.00/day | $12,500.00 | Wholesale re-orders, retail markups, daily foot traffic, COGS, gross margins, stockout penalties |
+| **Apex Digital Agency** | Digital Services | $25,000.00 | $2,500.00 | $85.00/day | $25,000.00 | Corporate client contracts, billable labor hours, strict calendar deadlines, project retainers |
 
-*Economic Insight:* As capital requirements increase exponentially, break-even periods gently widen from ~45 hours to ~73 hours, preventing hyper-inflation while maintaining meaningful long-term progression goals.
+### 3.2 Staffing & Human Resources Compensation
+Hiring employees scales throughput while introducing recurring Day 30 payroll commitments:
+- **Apprentice Mechanic:** $1,800.00/mo salary (+180 repair minutes/day)
+- **Senior Technician:** $3,200.00/mo salary (+250 repair minutes/day)
+- **Store Clerk:** $1,600.00/mo salary (+8 customer transactions/day)
+- **Inventory Manager:** $2,400.00/mo salary (+15 customer transactions/day)
+- **Junior Marketer:** $2,600.00/mo salary (+8 contract hours/day)
+- **Senior Strategist:** $4,500.00/mo salary (+16 contract hours/day)
+
+### 3.3 Commercial Credit Facilities
+- **Starter Commercial Loan:** $15,000.00 principal, 10% APR, 24-month term, $692.19/mo installment. Requires $\ge 1$ owned business.
+- **Expansion Commercial Loan:** $35,000.00 principal, 9% APR, 36-month term, $1,112.92/mo installment. Requires $\ge 1$ Level 2+ business.
 
 ### 3.2 Real Estate Rental Yields (Directly Verified)
 From the live in-game property market (`docs/screenshots/24_real_estate_offers.png`, `25_real_estate_offers_scroll.png`):

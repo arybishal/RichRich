@@ -20,8 +20,12 @@ Designed with clean-room engineering, 100% offline single-player persistence, an
 
 ```
 RichyRich/
+├── MILESTONE_4_REPORT.md                  # Milestone 4 completion report and verification
 ├── MILESTONE_3_REPORT.md                  # Milestone 3 completion report and verification
 ├── docs/                                  # Architectural specifications and reports
+│   ├── BUSINESS_OWNERSHIP_SPECIFICATION.md  # Commercial enterprise ownership & staffing
+│   ├── BUSINESS_ACCOUNTING_SPECIFICATION.md # P&L, COGS, operating overhead, commercial credit
+│   ├── BUSINESS_SIMULATION_SPECIFICATION.md # Auto repair, convenience store, digital agency
 │   ├── CAREER_SYSTEM_SPECIFICATION.md     # Multi-tier career ladders and promotion rules
 │   ├── EDUCATION_SYSTEM_SPECIFICATION.md  # University degree programs and study pacing
 │   ├── HOUSING_LIFESTYLE_SPECIFICATION.md # Housing tiers, deposits, energy and fatigue
@@ -43,18 +47,19 @@ RichyRich/
 │   │   │   └── MainGameplay.unity         # Core vertical slice scene
 │   │   └── Scripts/
 │   │       ├── Domain/                    # Pure C# domain models and services
-│   │       │   ├── Models/                # Currency, BalanceSheet, GameDateTime, Jobs, Housing, etc.
-│   │       │   ├── Persistence/           # SaveData (Schema v3), SaveDataService
-│   │       │   ├── Services/              # Clock, FinancialService, Career, Education, Housing, Lifestyle
+│   │       │   ├── Models/                # Currency, BalanceSheet, GameDateTime, Business, Employee, etc.
+│   │       │   ├── Persistence/           # SaveData (Schema v4), SaveDataService
+│   │       │   ├── Services/              # Clock, FinancialService, BusinessService, Career, Loan, etc.
 │   │       │   └── RichRich.Domain.asmdef # Enforces noEngineReferences: true
 │   │       └── Presentation/              # Presentation layer
-│   │           ├── Controllers/           # JobBoard, Education, Housing, Lifestyle, HUD, Business
-│   │           ├── Views/                 # Unity MonoBehaviours (JobBoardView, HousingView, MainHUDView)
+│   │           ├── Controllers/           # Business, JobBoard, Education, Housing, Lifestyle, HUD
+│   │           ├── Views/                 # Unity MonoBehaviours (MarketplaceView, DashboardView, StoreView, etc.)
 │   │           └── RichRich.Presentation.asmdef
 │   ├── Packages/                          # Unity package manifest
 │   └── ProjectSettings/                   # Unity project configuration and Android settings
 └── tests/
-    └── RichRich.Tests/                    # .NET 8 automated test suite (86 NUnit tests)
+    └── RichRich.Tests/                    # .NET 8 automated test suite (102 NUnit tests)
+        ├── Milestone4Tests.cs             # 16 tests: Enterprise ownership, Auto Repair, Retail, Agency, Staff, Credit
         ├── Milestone3Tests.cs             # 21 tests: Career ladders, Degrees, Housing, Energy, Schema v3
         ├── FinancialIntegrationAuditTests.cs # 20 tests: 12 Scenarios & 8 Stress Checks
         ├── LifeSimulationTests.cs         # 16 tests: Clock, Career, Expenses, Loans, Health, Saves
@@ -69,34 +74,32 @@ RichyRich/
 
 The domain models, business logic, persistence engine, and presentation controllers are completely decoupled from `UnityEngine.dll`, enabling instantaneous execution in headless CI/CD environments.
 
-To execute the complete 86-test suite:
+To execute the complete 102-test suite:
 
 ```powershell
 # Set .NET SDK path if not in global PATH
 $env:PATH = "$env:USERPROFILE\.dotnet;" + $env:PATH
 $env:DOTNET_ROOT = "$env:USERPROFILE\.dotnet"
 
-# Run all 86 NUnit unit and integration tests
+# Run all 102 NUnit unit and integration tests
 dotnet test tests/RichRich.Tests/RichRich.Tests.csproj
 ```
 
 **Test Coverage Highlights:**
-1. **Starting Cash Selection:** Verifies Hard ($1,000), Standard ($3,000), and Comfortable ($5,000) presets.
-2. **Simulation Clock Progression:** Verifies minute/hour/day conversions, configurable speed, and pause.
-3. **Daily & Monthly Transitions:** Verifies sequential chronological firing across month boundaries.
-4. **Recurring Living Expenses:** Verifies Day 1 deductions across 6 standard living expense categories.
-5. **Financial Ledger Accuracy:** Audits double-entry records, income, expenses, and cash flow.
-6. **Net Worth Calculation:** Accurately evaluates Cash + Assets - Liabilities, including negative net worth.
-7. **Negative Cash Flow:** Verifies that operational deficits trigger warnings without instant bankruptcy.
-8. **Loan Accounting:** Verifies loan disbursement increases Cash and Liabilities with 0 net worth impact.
-9. **Loan Amortization:** Calculates exact 12% APR monthly installments, splitting principal and interest.
-10. **Loan Repayments:** Verifies scheduled installments and early full payoff reduce liabilities.
-11. **Anti-Duplication:** Guarantees recurring payments trigger strictly once per calendar cycle.
-12. **Education Progression:** Verifies course enrollment, daily study hours, and credential awards.
-13. **Employment & Salary:** Verifies qualification validation, hiring, and Day 30 salary deposits.
-14. **Financial Health Evaluation:** Evaluates Healthy, Stressed, Crisis, Insolvent, and Bankrupt states.
-15. **Save & Reload Consistency:** Verifies roundtrip persistence of clock, career, loans, and education.
-16. **Life Simulation HUD Controller:** Validates presentation view-model formatting and clock speed controls.
+1. **Commercial Enterprise Ownership:** Browsing, acquiring, operating, and liquidating Auto Repair, Convenience Store, and Digital Agency.
+2. **Auto Repair Workshop:** Service bay management, vehicle repair progression, parts cost deduction, and delivery payouts.
+3. **Convenience Store Retail:** Wholesale ordering, price markup adjustment, daily customer traffic, COGS, gross margins, and stockout penalties.
+4. **Digital Marketing Agency:** Client contracts, skill requirements, billable labor contribution, and deadline enforcement.
+5. **Staffing & Payroll:** Employee recruitment across 6 industry roles, productivity scaling, and scheduled Day 30 monthly payroll.
+6. **Commercial Credit & Loans:** Starter and expansion loans, underwriting on business revenue, and early debt payoffs.
+7. **Consolidated P&L Accounting:** Isolated tracking of Gross Revenue, COGS, Operating Overhead, and Staff Payroll.
+8. **Schema Version 4 Persistence:** Atomic JSON save/load roundtrips and backward-compatible migration from Schemas 1, 2, and 3.
+9. **Interactive Job Board & Career Ladders:** Multi-tier career progression across Retail, Technology, and Business tracks.
+10. **Higher Education:** Degree programs (Business Administration Diploma, Computer Science Bachelor) and study pacing.
+11. **Housing Tiers & Leases:** Five accommodation tiers, deposit deductions, comfort ratings, and move-in verification.
+12. **Energy & Fatigue System:** Daily work and study energy depletion, fatigue levels, and overnight recovery.
+13. **Financial Ledger & Health:** Double-entry ledger records, solvency states (Healthy, Stressed, Crisis, Insolvent, Bankrupt).
+14. **Starting Cash Presets:** Hard ($1,000), Standard ($3,000), and Comfortable ($5,000) presets.
 
 ---
 
