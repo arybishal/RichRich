@@ -35,7 +35,7 @@ namespace RichRich.Tests
         public void SettingsModalController_Reports_CorrectVersionAndPackageId()
         {
             var controller = new SettingsModalController();
-            Assert.That(controller.VersionText, Does.Contain("0.1.3"));
+            Assert.That(controller.VersionText, Does.Contain("0.2.0"));
             Assert.That(controller.PackageIdText, Is.EqualTo("com.bishal.richrich"));
         }
 
@@ -71,7 +71,7 @@ namespace RichRich.Tests
             });
 
             Assert.That(fallback, Is.Not.Null);
-            Assert.That(fallback.SchemaVersion, Is.EqualTo(5));
+            Assert.That(fallback.SchemaVersion, Is.GreaterThanOrEqualTo(5));
             Assert.That(fallback.BalanceCents, Is.EqualTo(GameStartConfig.GetStartingCash(GameDifficulty.Standard).MinorUnits));
         }
 

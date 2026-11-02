@@ -46,6 +46,16 @@ namespace RichRich.Presentation.Views
         [Header("Real Estate & Property Portfolio")]
         [SerializeField] private RealEstateView _realEstateView;
 
+        [Header("Financial Markets & Equities")]
+        [SerializeField] private StockMarketView _stockMarketView;
+
+        [Header("Life Progression & Goals")]
+        [SerializeField] private LifeProgressionView _goalsView;
+
+        [Header("3D City Environment")]
+        [SerializeField] private CityInteractionController _cityController;
+        [SerializeField] private Button _cityOpenButton;
+
         public LifeSimulationCoordinator LifeCoordinator { get; private set; }
         public LifeSimulationHUDController LifeHUDController { get; private set; }
         public GameSessionCoordinator LegacyCoordinator { get; private set; }
@@ -66,6 +76,8 @@ namespace RichRich.Presentation.Views
         public BusinessEmployeeController EmployeeController { get; private set; }
         public BusinessFinanceController FinanceController { get; private set; }
         public RealEstateController RealEstateController { get; private set; }
+        public StockMarketController StockMarketController { get; private set; }
+        public LifeProgressionController GoalsController { get; private set; }
 
         private SaveDataService _saveService;
 
@@ -216,6 +228,30 @@ namespace RichRich.Presentation.Views
                 RealEstateController = new RealEstateController(LifeCoordinator);
                 if (_realEstateView != null) _realEstateView.Bind(RealEstateController);
             }, "RealEstate");
+
+            SafeBind(() =>
+            {
+                StockMarketController = new StockMarketController(LifeCoordinator);
+                if (_stockMarketView != null) _stockMarketView.Bind(StockMarketController);
+            }, "StockMarket");
+
+            SafeBind(() =>
+            {
+                GoalsController = new LifeProgressionController(LifeCoordinator);
+                if (_goalsView != null) _goalsView.Bind(GoalsController);
+            }, "LifeProgression");
+
+            SafeBind(() =>
+            {
+                if (_cityController == null)
+                {
+                    _cityController = FindObjectOfType<CityInteractionController>();
+                }
+                if (_cityController != null && _cityOpenButton != null)
+                {
+                    _cityOpenButton.onClick.AddListener(() => _cityController.SetCityExploreMode(true));
+                }
+            }, "CityEnvironment");
 
             // Legacy views (only wired if specifically present, without overwriting Schema 4 save)
             if (_shopView != null || _taskView != null)

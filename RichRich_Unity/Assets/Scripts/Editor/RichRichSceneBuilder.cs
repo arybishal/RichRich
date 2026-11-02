@@ -189,7 +189,11 @@ namespace RichRich.Editor
             var finBtn = CreateNavButton("NavFinanceBtn", navPanel, "Commercial Debt & P&L", 0, 1, 0.48f, 1, 10, -435, -5, -380);
             var realEstateBtn = CreateNavButton("NavRealEstateBtn", navPanel, "Real Estate Portfolio", 0.52f, 1, 1, 1, 5, -435, -10, -380);
 
-            var setBtn = CreateNavButton("NavSettingsBtn", navPanel, "Settings & Persistence", 0, 1, 1, 1, 10, -500, -10, -445);
+            var stockBtn = CreateNavButton("NavStockBtn", navPanel, "Equities & Markets", 0, 1, 0.48f, 1, 10, -500, -5, -445);
+            var goalsBtn = CreateNavButton("NavGoalsBtn", navPanel, "Goals & FIRE", 0.52f, 1, 1, 1, 5, -500, -10, -445);
+
+            var cityBtn = CreateNavButton("NavCity3DBtn", navPanel, "3D City Plaza", 0, 1, 0.48f, 1, 10, -565, -5, -510);
+            var setBtn = CreateNavButton("NavSettingsBtn", navPanel, "Settings & Persistence", 0.52f, 1, 1, 1, 5, -565, -10, -510);
 
             // Wire MainHUDView serialized fields
             SetPrivateField(hudView, "_cashBalanceText", cashText);
@@ -275,12 +279,22 @@ namespace RichRich.Editor
             var realEstateView = realEstateModal.AddComponent<RealEstateView>();
             BuildRealEstateUI(realEstateModal, realEstateView);
 
-            // --- 7.13 Settings Modal ---
+            // --- 7.13 Stock Market & Equities Modal ---
+            var stockModal = CreateModalSheet("StockMarketModal", modalsRoot, "Financial Markets & Equities Exchange", out var stockCloseBtn);
+            var stockView = stockModal.AddComponent<StockMarketView>();
+            BuildStockMarketUI(stockModal, stockView);
+
+            // --- 7.14 Life Progression & Goals Modal ---
+            var goalsModal = CreateModalSheet("GoalsModal", modalsRoot, "Life Progression & FIRE Goals", out var goalsCloseBtn);
+            var goalsView = goalsModal.AddComponent<LifeProgressionView>();
+            BuildGoalsUI(goalsModal, goalsView);
+
+            // --- 7.15 Settings Modal ---
             var setModal = CreateModalSheet("SettingsModal", modalsRoot, "Settings & Persistence", out var setCloseBtn);
             var setView = setModal.AddComponent<SettingsModalView>();
             BuildSettingsUI(setModal, setView, setCloseBtn);
 
-            // --- 7.14 Exit Confirmation Dialog ---
+            // --- 7.16 Exit Confirmation Dialog ---
             var exitDialog = CreateExitConfirmDialog(modalsRoot, out var exitCancelBtn, out var exitConfirmBtn);
             var modalManager = modalsRoot.GetComponent<ModalManager>();
             modalManager.BindExitDialog(exitDialog, exitCancelBtn, exitConfirmBtn);
@@ -325,6 +339,12 @@ namespace RichRich.Editor
             SetPrivateField(hudView, "_realEstateOpenButton", realEstateBtn);
             SetPrivateField(hudView, "_realEstateModalRoot", realEstateModal);
 
+            SetPrivateField(hudView, "_stockMarketOpenButton", stockBtn);
+            SetPrivateField(hudView, "_stockMarketModalRoot", stockModal);
+
+            SetPrivateField(hudView, "_goalsOpenButton", goalsBtn);
+            SetPrivateField(hudView, "_goalsModalRoot", goalsModal);
+
             SetPrivateField(hudView, "_settingsOpenButton", setBtn);
             SetPrivateField(hudView, "_settingsModalRoot", setModal);
 
@@ -345,7 +365,15 @@ namespace RichRich.Editor
             SetPrivateField(bootstrapper, "_employeeView", staffView);
             SetPrivateField(bootstrapper, "_financeView", finView);
             SetPrivateField(bootstrapper, "_realEstateView", realEstateView);
+            SetPrivateField(bootstrapper, "_stockMarketView", stockView);
+            SetPrivateField(bootstrapper, "_goalsView", goalsView);
             SetPrivateField(bootstrapper, "_settingsView", setView);
+
+            // 9. Original 3D Metropolitan City Environment
+            var cityCtrl = Build3DCityEnvironment(camGo, camera, canvasGo, scrollRoot, stockModal, finModal, realEstateModal, dashModal, housingModal, cityBtn);
+
+            SetPrivateField(bootstrapper, "_cityController", cityCtrl);
+            SetPrivateField(bootstrapper, "_cityOpenButton", cityBtn);
 
             // Mark objects dirty for serializer
             EditorUtility.SetDirty(bootstrapper);
@@ -362,6 +390,8 @@ namespace RichRich.Editor
             EditorUtility.SetDirty(staffView);
             EditorUtility.SetDirty(finView);
             EditorUtility.SetDirty(realEstateView);
+            EditorUtility.SetDirty(stockView);
+            EditorUtility.SetDirty(goalsView);
             EditorUtility.SetDirty(setView);
 
             // Save Scene
@@ -1111,6 +1141,133 @@ namespace RichRich.Editor
             SetPrivateField(view, "_feedbackText", feedback);
         }
 
+        private static void BuildStockMarketUI(GameObject root, StockMarketView view)
+        {
+            var content = root.transform.Find("Dialog/Content").gameObject;
+
+            // 1. Portfolio Header
+            var valText = CreateText("PortfolioVal", content, "Portfolio Value: $0.00", 24, new Color(0.35f, 0.85f, 0.98f), FontStyle.Bold, TextAnchor.MiddleLeft);
+            SetRect(valText.gameObject, 0, 0.92f, 0.5f, 0.98f, 20, 0, 0, 0);
+
+            var cashText = CreateText("LiquidCash", content, "Liquid Cash: $0.00", 24, Color.white, FontStyle.Normal, TextAnchor.MiddleRight);
+            SetRect(cashText.gameObject, 0.5f, 0.92f, 1, 0.98f, 0, 0, -20, 0);
+
+            var sentText = CreateText("MarketSentiment", content, "Market Sentiment: Bullish", 24, new Color(0.35f, 0.85f, 0.50f), FontStyle.Bold, TextAnchor.MiddleLeft);
+            SetRect(sentText.gameObject, 0, 0.86f, 0.5f, 0.92f, 20, 0, 0, 0);
+
+            var gainText = CreateText("TotalGainLoss", content, "Unrealized Gain: +$0.00 (+0.0%) | Divs: $0.00", 22, new Color(0.35f, 0.85f, 0.50f), FontStyle.Normal, TextAnchor.MiddleRight);
+            SetRect(gainText.gameObject, 0.5f, 0.86f, 1, 0.92f, 0, 0, -20, 0);
+
+            // 2. Stock Selector Buttons (6 stocks in 2 rows of 3)
+            var b1 = CreateButton("StockNVSTBtn", content, "NVST", new Color(0.18f, 0.28f, 0.42f), Color.white);
+            SetRect(b1.gameObject, 0.02f, 0.79f, 0.32f, 0.85f, 0, 0, 0, 0);
+
+            var b2 = CreateButton("StockBIOCBtn", content, "BIOC", new Color(0.18f, 0.28f, 0.42f), Color.white);
+            SetRect(b2.gameObject, 0.35f, 0.79f, 0.65f, 0.85f, 0, 0, 0, 0);
+
+            var b3 = CreateButton("StockSLRSBtn", content, "SLRS", new Color(0.18f, 0.28f, 0.42f), Color.white);
+            SetRect(b3.gameObject, 0.68f, 0.79f, 0.98f, 0.85f, 0, 0, 0, 0);
+
+            var b4 = CreateButton("StockAPXRBtn", content, "APXR", new Color(0.18f, 0.28f, 0.42f), Color.white);
+            SetRect(b4.gameObject, 0.02f, 0.72f, 0.32f, 0.78f, 0, 0, 0, 0);
+
+            var b5 = CreateButton("StockGLBKBtn", content, "GLBK", new Color(0.18f, 0.28f, 0.42f), Color.white);
+            SetRect(b5.gameObject, 0.35f, 0.72f, 0.65f, 0.78f, 0, 0, 0, 0);
+
+            var b6 = CreateButton("StockTITNBtn", content, "TITN", new Color(0.18f, 0.28f, 0.42f), Color.white);
+            SetRect(b6.gameObject, 0.68f, 0.72f, 0.98f, 0.78f, 0, 0, 0, 0);
+
+            // 3. Selected Stock Details Card
+            var title = CreateText("StockTitle", content, "NVST - Novus Technologies", 26, Color.white, FontStyle.Bold, TextAnchor.MiddleLeft);
+            SetRect(title.gameObject, 0, 0.65f, 0.65f, 0.71f, 20, 0, 0, 0);
+
+            var sector = CreateText("Sector", content, "Sector: Technology", 22, new Color(0.70f, 0.75f, 0.85f), FontStyle.Normal, TextAnchor.MiddleRight);
+            SetRect(sector.gameObject, 0.65f, 0.65f, 1, 0.71f, 0, 0, -20, 0);
+
+            var price = CreateText("CurrentPrice", content, "Price: $142.50", 24, new Color(0.98f, 0.85f, 0.35f), FontStyle.Bold, TextAnchor.MiddleLeft);
+            SetRect(price.gameObject, 0, 0.59f, 0.5f, 0.65f, 20, 0, 0, 0);
+
+            var change = CreateText("DayChange", content, "Day Change: +0.00%", 24, new Color(0.35f, 0.85f, 0.50f), FontStyle.Bold, TextAnchor.MiddleRight);
+            SetRect(change.gameObject, 0.5f, 0.59f, 1, 0.65f, 0, 0, -20, 0);
+
+            var divYield = CreateText("DivYield", content, "Dividend Yield: 0.8% APR", 22, new Color(0.70f, 0.75f, 0.85f), FontStyle.Normal, TextAnchor.MiddleLeft);
+            SetRect(divYield.gameObject, 0, 0.53f, 0.5f, 0.59f, 20, 0, 0, 0);
+
+            var range = CreateText("FiftyTwoWeekRange", content, "52-Wk Range: $142.50 - $142.50", 22, new Color(0.70f, 0.75f, 0.85f), FontStyle.Normal, TextAnchor.MiddleRight);
+            SetRect(range.gameObject, 0.5f, 0.53f, 1, 0.59f, 0, 0, -20, 0);
+
+            var holdingShares = CreateText("HoldingShares", content, "Holdings: 0 shares ($0.00)", 22, Color.white, FontStyle.Normal, TextAnchor.MiddleLeft);
+            SetRect(holdingShares.gameObject, 0, 0.47f, 0.55f, 0.53f, 20, 0, 0, 0);
+
+            var holdingReturn = CreateText("HoldingReturn", content, "Avg Cost: $0.00 | Return: 0.0%", 22, new Color(0.70f, 0.75f, 0.85f), FontStyle.Normal, TextAnchor.MiddleRight);
+            SetRect(holdingReturn.gameObject, 0.55f, 0.47f, 1, 0.53f, 0, 0, -20, 0);
+
+            // 4. Order Sizing Controls
+            var qtyText = CreateText("OrderQty", content, "Order Qty: 10 shares", 24, Color.white, FontStyle.Bold, TextAnchor.MiddleLeft);
+            SetRect(qtyText.gameObject, 0, 0.38f, 0.4f, 0.45f, 20, 0, 0, 0);
+
+            var minus1 = CreateButton("Minus1Btn", content, "-1", new Color(0.25f, 0.30f, 0.40f), Color.white);
+            SetRect(minus1.gameObject, 0.42f, 0.38f, 0.52f, 0.45f, 0, 0, 0, 0);
+
+            var plus1 = CreateButton("Plus1Btn", content, "+1", new Color(0.25f, 0.30f, 0.40f), Color.white);
+            SetRect(plus1.gameObject, 0.54f, 0.38f, 0.64f, 0.45f, 0, 0, 0, 0);
+
+            var plus10 = CreateButton("Plus10Btn", content, "+10", new Color(0.25f, 0.30f, 0.40f), Color.white);
+            SetRect(plus10.gameObject, 0.66f, 0.38f, 0.78f, 0.45f, 0, 0, 0, 0);
+
+            var maxAfford = CreateButton("MaxAffordBtn", content, "Max Buy", new Color(0.18f, 0.45f, 0.75f), Color.white);
+            SetRect(maxAfford.gameObject, 0.80f, 0.38f, 0.98f, 0.45f, 0, 0, 0, 0);
+
+            var maxSell = CreateButton("MaxSellBtn", content, "Max Sell", new Color(0.65f, 0.35f, 0.20f), Color.white);
+            SetRect(maxSell.gameObject, 0.80f, 0.30f, 0.98f, 0.37f, 0, 0, 0, 0);
+
+            var costPreview = CreateText("CostPreview", content, "Buy Est: $0.00 (Fee: $1.00) | Sell Est: $0.00", 22, new Color(0.80f, 0.85f, 0.95f), FontStyle.Normal, TextAnchor.MiddleLeft);
+            SetRect(costPreview.gameObject, 0, 0.30f, 0.78f, 0.37f, 20, 0, 0, 0);
+
+            // 5. Order Execution Buttons
+            var buyBtn = CreateButton("BuySharesBtn", content, "Buy Shares", new Color(0.12f, 0.55f, 0.35f), Color.white);
+            SetRect(buyBtn.gameObject, 0.02f, 0.18f, 0.48f, 0.27f, 0, 0, 0, 0);
+
+            var sellBtn = CreateButton("SellSharesBtn", content, "Sell Shares", new Color(0.75f, 0.25f, 0.25f), Color.white);
+            SetRect(sellBtn.gameObject, 0.52f, 0.18f, 0.98f, 0.27f, 0, 0, 0, 0);
+
+            var feedback = CreateText("Feedback", content, "", 22, new Color(0.95f, 0.85f, 0.4f), FontStyle.Bold, TextAnchor.MiddleCenter);
+            SetRect(feedback.gameObject, 0, 0.05f, 1, 0.14f, 20, 0, -20, 0);
+
+            // Wire view private fields
+            SetPrivateField(view, "_totalValuationText", valText);
+            SetPrivateField(view, "_totalGainLossText", gainText);
+            SetPrivateField(view, "_sentimentText", sentText);
+            SetPrivateField(view, "_liquidCashText", cashText);
+
+            SetPrivateField(view, "_selectNVSTButton", b1);
+            SetPrivateField(view, "_selectBIOCButton", b2);
+            SetPrivateField(view, "_selectSLRSButton", b3);
+            SetPrivateField(view, "_selectAPXRButton", b4);
+            SetPrivateField(view, "_selectGLBKButton", b5);
+            SetPrivateField(view, "_selectTITNButton", b6);
+
+            SetPrivateField(view, "_stockTitleText", title);
+            SetPrivateField(view, "_sectorText", sector);
+            SetPrivateField(view, "_currentPriceText", price);
+            SetPrivateField(view, "_dayChangeText", change);
+            SetPrivateField(view, "_dividendYieldText", divYield);
+            SetPrivateField(view, "_historyRangeText", range);
+            SetPrivateField(view, "_holdingSharesText", holdingShares);
+            SetPrivateField(view, "_holdingReturnText", holdingReturn);
+
+            SetPrivateField(view, "_quantityText", qtyText);
+            SetPrivateField(view, "_minus1Button", minus1);
+            SetPrivateField(view, "_plus1Button", plus1);
+            SetPrivateField(view, "_plus10Button", plus10);
+            SetPrivateField(view, "_maxAffordButton", maxAfford);
+            SetPrivateField(view, "_maxSellButton", maxSell);
+            SetPrivateField(view, "_orderCostPreviewText", costPreview);
+            SetPrivateField(view, "_buyButton", buyBtn);
+            SetPrivateField(view, "_sellButton", sellBtn);
+            SetPrivateField(view, "_feedbackText", feedback);
+        }
+
         private static void BuildSettingsUI(GameObject root, SettingsModalView view, Button closeBtn)
         {
             var content = root.transform.Find("Dialog/Content").gameObject;
@@ -1131,7 +1288,7 @@ namespace RichRich.Editor
             hapticsToggle.GetComponentInChildren<Text>().color = Color.white;
             SetRect(hapticsToggleGo, 0.1f, 0.62f, 0.9f, 0.72f, 0, 0, 0, 0);
 
-            var ver = CreateText("Version", content, "Version: 0.1.2", 24, new Color(0.7f, 0.75f, 0.85f), FontStyle.Normal, TextAnchor.MiddleLeft);
+            var ver = CreateText("Version", content, "Version: 0.2.0", 24, new Color(0.7f, 0.75f, 0.85f), FontStyle.Normal, TextAnchor.MiddleLeft);
             SetRect(ver.gameObject, 0, 0.48f, 1, 0.56f, 20, 0, -20, 0);
             var pkg = CreateText("Pkg", content, "Package: com.bishal.richrich", 24, new Color(0.7f, 0.75f, 0.85f), FontStyle.Normal, TextAnchor.MiddleLeft);
             SetRect(pkg.gameObject, 0, 0.40f, 1, 0.48f, 20, 0, -20, 0);
@@ -1145,6 +1302,341 @@ namespace RichRich.Editor
             SetPrivateField(view, "_packageIdText", pkg);
             SetPrivateField(view, "_resetSaveButton", resetBtn);
             SetPrivateField(view, "_closeButton", closeBtn);
+        }
+
+        private static void BuildGoalsUI(GameObject root, LifeProgressionView view)
+        {
+            var content = root.transform.Find("Dialog/Content").gameObject;
+
+            // 1. Header & FIRE Card
+            var headCard = CreatePanel("FireHeaderCard", content, new Color(0.08f, 0.14f, 0.24f, 0.95f));
+            SetRect(headCard, 0.02f, 0.86f, 0.98f, 0.98f, 0, 0, 0, 0);
+
+            var milestonesSummary = CreateText("MilestonesSummary", headCard, "0/7 Milestones Unlocked", 24, new Color(0.95f, 0.82f, 0.25f), FontStyle.Bold, TextAnchor.MiddleLeft);
+            SetRect(milestonesSummary.gameObject, 0, 0.65f, 0.5f, 0.95f, 15, 0, 0, 0);
+
+            var fireRatio = CreateText("FireRatio", headCard, "0% FIRE Target", 24, new Color(0.35f, 0.90f, 0.60f), FontStyle.Bold, TextAnchor.MiddleRight);
+            SetRect(fireRatio.gameObject, 0.5f, 0.65f, 1f, 0.95f, 0, 0, -15, 0);
+
+            var sliderGo = DefaultControls.CreateSlider(_defaultResources);
+            sliderGo.transform.SetParent(headCard.transform, false);
+            var fireSlider = sliderGo.GetComponent<Slider>();
+            SetRect(sliderGo, 0.02f, 0.35f, 0.98f, 0.60f, 0, 0, 0, 0);
+
+            var fireSummary = CreateText("FireSummary", headCard, "Passive Income: $0.00 / mo (Living Expenses: $0.00 / mo)", 20, new Color(0.80f, 0.85f, 0.95f), FontStyle.Normal, TextAnchor.MiddleLeft);
+            SetRect(fireSummary.gameObject, 0, 0.05f, 1f, 0.32f, 15, 0, -15, 0);
+
+            // 2. Goal Cards (7 Compact Cards)
+            CreateGoalCard(content, 0.77f, 0.84f, "1. Financial Foundation", out var g1Title, out var g1Desc, out var g1Slider, out var g1Prog, out var g1Rew);
+            CreateGoalCard(content, 0.69f, 0.76f, "2. Corporate Climber", out var g2Title, out var g2Desc, out var g2Slider, out var g2Prog, out var g2Rew);
+            CreateGoalCard(content, 0.61f, 0.68f, "3. Property Investor", out var g3Title, out var g3Desc, out var g3Slider, out var g3Prog, out var g3Rew);
+            CreateGoalCard(content, 0.53f, 0.60f, "4. Serial Entrepreneur", out var g4Title, out var g4Desc, out var g4Slider, out var g4Prog, out var g4Rew);
+            CreateGoalCard(content, 0.45f, 0.52f, "5. Wall Street Capitalist", out var g5Title, out var g5Desc, out var g5Slider, out var g5Prog, out var g5Rew);
+            CreateGoalCard(content, 0.37f, 0.44f, "6. Financial Independence (FIRE)", out var g6Title, out var g6Desc, out var g6Slider, out var g6Prog, out var g6Rew);
+            CreateGoalCard(content, 0.29f, 0.36f, "7. Self-Made Millionaire", out var g7Title, out var g7Desc, out var g7Slider, out var g7Prog, out var g7Rew);
+
+            // 3. Dynamic Life Event Dialog Card
+            var eventCard = CreatePanel("EventCard", content, new Color(0.10f, 0.16f, 0.28f, 1.0f));
+            SetRect(eventCard, 0.02f, 0.02f, 0.98f, 0.27f, 0, 0, 0, 0);
+
+            var eventTitle = CreateText("EventTitle", eventCard, "Macroeconomic Scenario / Life Opportunity", 24, new Color(0.95f, 0.82f, 0.25f), FontStyle.Bold, TextAnchor.MiddleLeft);
+            SetRect(eventTitle.gameObject, 0, 0.78f, 1f, 0.98f, 15, 0, -15, 0);
+
+            var eventDesc = CreateText("EventDesc", eventCard, "No active macroeconomic decision pending at this time.", 20, Color.white, FontStyle.Normal, TextAnchor.UpperLeft);
+            SetRect(eventDesc.gameObject, 0, 0.44f, 1f, 0.76f, 15, 0, -15, 0);
+
+            var choice1Btn = CreateButton("Choice1Btn", eventCard, "Option A", new Color(0.12f, 0.52f, 0.35f), Color.white);
+            SetRect(choice1Btn.gameObject, 0.03f, 0.18f, 0.48f, 0.40f, 0, 0, 0, 0);
+            var choice1Text = choice1Btn.GetComponentInChildren<Text>();
+
+            var choice2Btn = CreateButton("Choice2Btn", eventCard, "Option B", new Color(0.24f, 0.32f, 0.48f), Color.white);
+            SetRect(choice2Btn.gameObject, 0.52f, 0.18f, 0.97f, 0.40f, 0, 0, 0, 0);
+            var choice2Text = choice2Btn.GetComponentInChildren<Text>();
+
+            var eventFeedback = CreateText("EventFeedback", eventCard, "", 20, new Color(0.35f, 0.95f, 0.55f), FontStyle.Bold, TextAnchor.MiddleCenter);
+            SetRect(eventFeedback.gameObject, 0, 0.02f, 1f, 0.16f, 15, 0, -15, 0);
+
+            // Wire view private fields
+            SetPrivateField(view, "_milestonesSummaryText", milestonesSummary);
+            SetPrivateField(view, "_fireRatioText", fireRatio);
+            SetPrivateField(view, "_fireSummaryText", fireSummary);
+            SetPrivateField(view, "_fireSlider", fireSlider);
+
+            SetPrivateField(view, "_goal1TitleText", g1Title);
+            SetPrivateField(view, "_goal1DescText", g1Desc);
+            SetPrivateField(view, "_goal1Slider", g1Slider);
+            SetPrivateField(view, "_goal1ProgressText", g1Prog);
+            SetPrivateField(view, "_goal1RewardText", g1Rew);
+
+            SetPrivateField(view, "_goal2TitleText", g2Title);
+            SetPrivateField(view, "_goal2DescText", g2Desc);
+            SetPrivateField(view, "_goal2Slider", g2Slider);
+            SetPrivateField(view, "_goal2ProgressText", g2Prog);
+            SetPrivateField(view, "_goal2RewardText", g2Rew);
+
+            SetPrivateField(view, "_goal3TitleText", g3Title);
+            SetPrivateField(view, "_goal3DescText", g3Desc);
+            SetPrivateField(view, "_goal3Slider", g3Slider);
+            SetPrivateField(view, "_goal3ProgressText", g3Prog);
+            SetPrivateField(view, "_goal3RewardText", g3Rew);
+
+            SetPrivateField(view, "_goal4TitleText", g4Title);
+            SetPrivateField(view, "_goal4DescText", g4Desc);
+            SetPrivateField(view, "_goal4Slider", g4Slider);
+            SetPrivateField(view, "_goal4ProgressText", g4Prog);
+            SetPrivateField(view, "_goal4RewardText", g4Rew);
+
+            SetPrivateField(view, "_goal5TitleText", g5Title);
+            SetPrivateField(view, "_goal5DescText", g5Desc);
+            SetPrivateField(view, "_goal5Slider", g5Slider);
+            SetPrivateField(view, "_goal5ProgressText", g5Prog);
+            SetPrivateField(view, "_goal5RewardText", g5Rew);
+
+            SetPrivateField(view, "_goal6TitleText", g6Title);
+            SetPrivateField(view, "_goal6DescText", g6Desc);
+            SetPrivateField(view, "_goal6Slider", g6Slider);
+            SetPrivateField(view, "_goal6ProgressText", g6Prog);
+            SetPrivateField(view, "_goal6RewardText", g6Rew);
+
+            SetPrivateField(view, "_goal7TitleText", g7Title);
+            SetPrivateField(view, "_goal7DescText", g7Desc);
+            SetPrivateField(view, "_goal7Slider", g7Slider);
+            SetPrivateField(view, "_goal7ProgressText", g7Prog);
+            SetPrivateField(view, "_goal7RewardText", g7Rew);
+
+            SetPrivateField(view, "_eventPanel", eventCard);
+            SetPrivateField(view, "_eventTitleText", eventTitle);
+            SetPrivateField(view, "_eventDescriptionText", eventDesc);
+            SetPrivateField(view, "_choice1Button", choice1Btn);
+            SetPrivateField(view, "_choice1Text", choice1Text);
+            SetPrivateField(view, "_choice2Button", choice2Btn);
+            SetPrivateField(view, "_choice2Text", choice2Text);
+            SetPrivateField(view, "_eventFeedbackText", eventFeedback);
+        }
+
+        private static void CreateGoalCard(
+            GameObject parent,
+            float yMin, float yMax,
+            string defaultTitle,
+            out Text titleText,
+            out Text descText,
+            out Slider slider,
+            out Text progressText,
+            out Text rewardText)
+        {
+            var card = CreatePanel("GoalCard", parent, new Color(0.07f, 0.11f, 0.18f, 0.95f));
+            SetRect(card, 0.02f, yMin, 0.98f, yMax, 0, 0, 0, 0);
+
+            titleText = CreateText("Title", card, defaultTitle, 22, Color.white, FontStyle.Bold, TextAnchor.MiddleLeft);
+            SetRect(titleText.gameObject, 0, 0.62f, 0.65f, 1f, 15, 0, 0, 0);
+
+            rewardText = CreateText("Reward", card, "Award: $1,000", 20, new Color(0.95f, 0.82f, 0.25f), FontStyle.Normal, TextAnchor.MiddleRight);
+            SetRect(rewardText.gameObject, 0.65f, 0.62f, 1f, 1f, 0, 0, -15, 0);
+
+            descText = CreateText("Desc", card, "Description", 18, new Color(0.75f, 0.80f, 0.90f), FontStyle.Normal, TextAnchor.MiddleLeft);
+            SetRect(descText.gameObject, 0, 0.32f, 1f, 0.62f, 15, 0, -15, 0);
+
+            var sliderGo = DefaultControls.CreateSlider(_defaultResources);
+            sliderGo.transform.SetParent(card.transform, false);
+            slider = sliderGo.GetComponent<Slider>();
+            SetRect(sliderGo, 0.02f, 0.05f, 0.75f, 0.30f, 0, 0, 0, 0);
+
+            progressText = CreateText("Prog", card, "0%", 18, Color.white, FontStyle.Normal, TextAnchor.MiddleRight);
+            SetRect(progressText.gameObject, 0.76f, 0.05f, 0.98f, 0.30f, 0, 0, -5, 0);
+        }
+
+        private static CityInteractionController Build3DCityEnvironment(
+            GameObject camGo,
+            Camera camera,
+            GameObject canvasGo,
+            GameObject scrollRoot,
+            GameObject stockModal,
+            GameObject finModal,
+            GameObject realEstateModal,
+            GameObject dashModal,
+            GameObject housingModal,
+            Button cityBtn)
+        {
+            // 1. Perspective Camera Setup
+            camGo.transform.position = new Vector3(0f, 14f, -16f);
+            camGo.transform.rotation = Quaternion.Euler(36f, 0f, 0f);
+            camera.orthographic = false;
+            camera.fieldOfView = 50f;
+
+            var cityController = camGo.AddComponent<CityInteractionController>();
+
+            // 2. City Environment Parent
+            var cityParent = new GameObject("City3DEnvironment");
+
+            // 3. Directional Key Light
+            var lightGo = new GameObject("CityDirectionalLight");
+            lightGo.transform.SetParent(cityParent.transform, false);
+            var light = lightGo.AddComponent<Light>();
+            light.type = LightType.Directional;
+            light.color = new Color(0.95f, 0.92f, 0.88f);
+            light.intensity = 1.15f;
+            lightGo.transform.rotation = Quaternion.Euler(45f, -35f, 0f);
+
+            // 4. Ground Plaza
+            var ground = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            ground.name = "PlazaGround";
+            ground.transform.SetParent(cityParent.transform, false);
+            ground.transform.position = new Vector3(0, -0.25f, 1.5f);
+            ground.transform.localScale = new Vector3(24f, 0.5f, 22f);
+            ground.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial(new Color(0.08f, 0.10f, 0.16f));
+
+            // Roads / Avenues
+            var roadH = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            roadH.name = "CentralBoulevard";
+            roadH.transform.SetParent(cityParent.transform, false);
+            roadH.transform.position = new Vector3(0, 0.02f, 1.5f);
+            roadH.transform.localScale = new Vector3(24f, 0.05f, 2.5f);
+            roadH.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial(new Color(0.12f, 0.15f, 0.22f));
+
+            var roadV = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            roadV.name = "MetroAvenue";
+            roadV.transform.SetParent(cityParent.transform, false);
+            roadV.transform.position = new Vector3(0, 0.02f, 1.5f);
+            roadV.transform.localScale = new Vector3(2.5f, 0.05f, 22f);
+            roadV.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial(new Color(0.12f, 0.15f, 0.22f));
+
+            // 5. Stylized Interactive 3D Buildings
+            // 5.1 Stock Exchange Tower (Center)
+            CreateStylizedBuilding("Building_StockExchange", cityParent,
+                new Vector3(0f, 0f, 4.5f),
+                new Vector3(3.2f, 8.5f, 3.2f),
+                new Color(0.12f, 0.18f, 0.28f),
+                new Color(0.22f, 0.74f, 0.97f),
+                "Equities & Stock Exchange",
+                stockModal,
+                BuildingDistrictType.StockExchange);
+
+            // 5.2 Metropolitan Commercial Bank (Left Front)
+            CreateStylizedBuilding("Building_Bank", cityParent,
+                new Vector3(-4.8f, 0f, -1.0f),
+                new Vector3(3.4f, 5.2f, 3.4f),
+                new Color(0.14f, 0.18f, 0.25f),
+                new Color(0.96f, 0.62f, 0.04f),
+                "Commercial Bank & Credit",
+                finModal,
+                BuildingDistrictType.Bank);
+
+            // 5.3 Real Estate Skyline Plaza (Right Front)
+            CreateStylizedBuilding("Building_RealEstate", cityParent,
+                new Vector3(4.8f, 0f, -1.0f),
+                new Vector3(3.2f, 7.2f, 3.2f),
+                new Color(0.08f, 0.22f, 0.20f),
+                new Color(0.06f, 0.73f, 0.51f),
+                "Skyline Real Estate Agency",
+                realEstateModal,
+                BuildingDistrictType.RealEstate);
+
+            // 5.4 Apex Corporate HQ (Left Rear)
+            CreateStylizedBuilding("Building_CorporateHQ", cityParent,
+                new Vector3(-5.0f, 0f, 6.0f),
+                new Vector3(3.0f, 6.4f, 3.0f),
+                new Color(0.12f, 0.22f, 0.38f),
+                new Color(0.39f, 0.40f, 0.95f),
+                "Apex Corporate Headquarters",
+                dashModal,
+                BuildingDistrictType.Corporation);
+
+            // 5.5 Residential High-Rise District (Right Rear)
+            CreateStylizedBuilding("Building_Residential", cityParent,
+                new Vector3(5.0f, 0f, 6.0f),
+                new Vector3(3.0f, 5.8f, 3.0f),
+                new Color(0.22f, 0.14f, 0.24f),
+                new Color(0.96f, 0.25f, 0.37f),
+                "Metropolitan Residential Leases",
+                housingModal,
+                BuildingDistrictType.Residential);
+
+            // 6. City Explore Overlay UI
+            var cityOverlay = CreateUIObject("CityExploreOverlay", canvasGo);
+            StretchFull(cityOverlay);
+            cityOverlay.SetActive(false);
+
+            var topBanner = CreatePanel("TopBanner", cityOverlay, new Color(0.06f, 0.10f, 0.18f, 0.90f));
+            SetRect(topBanner, 0.05f, 0.90f, 0.95f, 0.98f, 0, 0, 0, 0);
+            var cityTitle = CreateText("Title", topBanner, "★ METROPOLITAN FINANCIAL DISTRICT", 28, new Color(0.95f, 0.82f, 0.25f), FontStyle.Bold, TextAnchor.MiddleCenter);
+            StretchFull(cityTitle.gameObject);
+
+            var subBanner = CreatePanel("SubBanner", cityOverlay, new Color(0.08f, 0.12f, 0.22f, 0.85f));
+            SetRect(subBanner, 0.10f, 0.84f, 0.90f, 0.89f, 0, 0, 0, 0);
+            var subText = CreateText("Sub", subBanner, "Tap any 3D building to enter subsystem", 22, Color.white, FontStyle.Normal, TextAnchor.MiddleCenter);
+            StretchFull(subText.gameObject);
+
+            var returnBtn = CreateButton("ReturnBtn", cityOverlay, "← Return to Dashboard", new Color(0.18f, 0.28f, 0.45f), Color.white);
+            SetRect(returnBtn.gameObject, 0.15f, 0.04f, 0.85f, 0.11f, 0, 0, 0, 0);
+            returnBtn.onClick.AddListener(() => cityController.SetCityExploreMode(false));
+
+            // Wire cityBtn from HUD
+            if (cityBtn != null)
+            {
+                cityBtn.onClick.AddListener(() => cityController.SetCityExploreMode(true));
+            }
+
+            SetPrivateField(cityController, "_cityCamera", camera);
+            SetPrivateField(cityController, "_hudScrollContent", scrollRoot);
+            SetPrivateField(cityController, "_cityViewHUDOverlay", cityOverlay);
+            SetPrivateField(cityController, "_returnToDashboardButton", returnBtn);
+
+            return cityController;
+        }
+
+        private static GameObject CreateStylizedBuilding(
+            string name,
+            GameObject parent,
+            Vector3 position,
+            Vector3 towerScale,
+            Color bodyColor,
+            Color accentColor,
+            string label,
+            GameObject targetModal,
+            BuildingDistrictType type)
+        {
+            var buildingRoot = new GameObject(name);
+            buildingRoot.transform.SetParent(parent.transform, false);
+            buildingRoot.transform.position = position;
+
+            // Main tower
+            var tower = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            tower.name = "TowerMesh";
+            tower.transform.SetParent(buildingRoot.transform, false);
+            tower.transform.localPosition = new Vector3(0, towerScale.y * 0.5f, 0);
+            tower.transform.localScale = towerScale;
+            tower.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial(bodyColor);
+
+            // Crown / Spire
+            var crown = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            crown.name = "CrownMesh";
+            crown.transform.SetParent(buildingRoot.transform, false);
+            crown.transform.localPosition = new Vector3(0, towerScale.y + 0.5f, 0);
+            crown.transform.localScale = new Vector3(towerScale.x * 0.6f, 1.0f, towerScale.z * 0.6f);
+            crown.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial(accentColor);
+
+            // Box Collider on buildingRoot covering both tower and crown
+            var col = buildingRoot.AddComponent<BoxCollider>();
+            col.center = new Vector3(0, (towerScale.y + 1.0f) * 0.5f, 0);
+            col.size = new Vector3(towerScale.x * 1.15f, towerScale.y + 1.2f, towerScale.z * 1.15f);
+
+            // Interactive script
+            var buildingComp = buildingRoot.AddComponent<CityBuilding>();
+            buildingComp.BindTargetModal(targetModal, label, type, accentColor);
+
+            return buildingRoot;
+        }
+
+        private static Material CreateStylizedMaterial(Color color)
+        {
+            var shader = Shader.Find("Mobile/Diffuse")
+                         ?? Shader.Find("Universal Render Pipeline/Lit")
+                         ?? Shader.Find("Standard")
+                         ?? Shader.Find("Unlit/Color")
+                         ?? Shader.Find("Sprites/Default");
+            var mat = new Material(shader);
+            mat.color = color;
+            return mat;
         }
 
         #endregion

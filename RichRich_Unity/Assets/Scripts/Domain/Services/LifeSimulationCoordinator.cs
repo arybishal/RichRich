@@ -29,6 +29,8 @@ namespace RichRich.Domain.Services
         public LifestyleService LifestyleService { get; private set; }
         public BusinessService BusinessService { get; private set; }
         public RealEstateService RealEstateService { get; private set; }
+        public StockMarketService StockMarketService { get; private set; }
+        public LifeProgressionService LifeProgressionService { get; private set; }
         public FinancialHealthService HealthService { get; private set; }
         public ISaveDataService SaveService { get; }
 
@@ -290,8 +292,69 @@ namespace RichRich.Domain.Services
                 HealthService.RealEstateService = RealEstateService;
             }
 
+            // 12. Financial Markets & Investment Portfolio (Schema 6)
+            StockMarketService = new StockMarketService(Wallet, Ledger, FinancialService, Clock);
+            if (Enum.TryParse(save.MarketSentiment, out MarketSentiment sentiment))
+            {
+                StockMarketService.RestoreSentiment(sentiment, save.MarketSentimentDaysRemaining > 0 ? save.MarketSentimentDaysRemaining : 30);
+            }
+
+            if (save.StockPrices != null && save.StockPrices.Count > 0)
+            {
+                foreach (var pSnap in save.StockPrices)
+                {
+                    var stock = StockMarketService.GetStock(pSnap.Ticker);
+                    if (stock != null)
+                    {
+                        stock.SetRestoredState(
+                            Currency.FromCents(pSnap.CurrentPriceCents),
+                            Currency.FromCents(pSnap.PreviousDayPriceCents),
+                            pSnap.PriceHistoryCents?.Select(c => Currency.FromCents(c))
+                        );
+                    }
+                }
+            }
+
+            if (save.StockHoldings != null && save.StockHoldings.Count > 0)
+            {
+                foreach (var hSnap in save.StockHoldings)
+                {
+                    if (hSnap.SharesOwned > 0)
+                    {
+                        StockMarketService.RestorePosition(
+                            hSnap.Ticker,
+                            hSnap.SharesOwned,
+                            Currency.FromCents(hSnap.TotalInvestedCents),
+                            Currency.FromCents(hSnap.TotalDividendsCents)
+                        );
+                    }
+                }
+            }
+
             BusinessService.UpdateBalanceSheetAssets();
             RealEstateService.UpdateBalanceSheet();
+            StockMarketService.UpdateBalanceSheet();
+
+            // 13. Life Progression, Goals & Dynamic Events (Schema 7)
+            LifeProgressionService = new LifeProgressionService(
+                Wallet,
+                Ledger,
+                FinancialService,
+                CareerService,
+                BusinessService,
+                RealEstateService,
+                StockMarketService,
+                ExpenseService,
+                Clock
+            );
+
+            if (save.Goals != null && save.Goals.Count > 0)
+            {
+                foreach (var gSnap in save.Goals)
+                {
+                    LifeProgressionService.RestoreGoalCompletion(gSnap.GoalId, gSnap.IsCompleted, gSnap.CompletedDateUnix);
+                }
+            }
         }
 
         public void Tick(double deltaRealSeconds)
@@ -309,7 +372,7 @@ namespace RichRich.Domain.Services
             var autoRepair = BusinessService?.GetBusiness("auto_repair");
             var save = new SaveData
             {
-                SchemaVersion = 5,
+                SchemaVersion = 7,
                 CreatedAtUnix = _createdAtUnix != 0 ? _createdAtUnix : DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
                 LastSavedUnix = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
                 Difficulty = Difficulty.ToString(),
@@ -431,6 +494,31 @@ namespace RichRich.Domain.Services
                         PaymentsMade = p.Mortgage.PaymentsMade
                     } : null
                 }).ToList() ?? new List<PropertySaveSnapshot>(),
+                MarketSentiment = StockMarketService?.CurrentSentiment.ToString() ?? "Bullish",
+                MarketSentimentDaysRemaining = StockMarketService?.SentimentDaysRemaining ?? 30,
+                StockPrices = StockMarketService?.Equities.Select(s => new StockPriceSaveSnapshot
+                {
+                    Ticker = s.Ticker,
+                    CurrentPriceCents = s.CurrentPrice.MinorUnits,
+                    PreviousDayPriceCents = s.PreviousDayPrice.MinorUnits,
+                    PriceHistoryCents = s.PriceHistory.Select(h => (long)h.MinorUnits).ToList()
+                }).ToList() ?? new List<StockPriceSaveSnapshot>(),
+                StockHoldings = StockMarketService?.Positions.Select(p => new StockPositionSaveSnapshot
+                {
+                    Ticker = p.Ticker,
+                    SharesOwned = p.SharesOwned,
+                    TotalInvestedCents = p.TotalInvested.MinorUnits,
+                    TotalDividendsCents = p.TotalDividendsEarned.MinorUnits
+                }).ToList() ?? new List<StockPositionSaveSnapshot>(),
+                Goals = LifeProgressionService?.Goals.Select(g => new GoalSaveSnapshot
+                {
+                    GoalId = g.Id,
+                    IsCompleted = g.IsCompleted,
+                    CurrentValue = g.CurrentValue,
+                    CompletedDateUnix = g.CompletedDate.HasValue ? g.CompletedDate.Value.TotalMinutes : 0L
+                }).ToList() ?? new List<GoalSaveSnapshot>(),
+                DaysUntilNextLifeEvent = LifeProgressionService?.DaysUntilNextEvent ?? 25,
+                PendingLifeEventId = LifeProgressionService?.CurrentPendingEvent?.Id,
                 CurrentLevel = 1,
                 Tickets = EconomyConfig.StartingTickets,
                 BusinessId = "auto_repair",

@@ -116,16 +116,43 @@ namespace RichRich.Domain.Persistence
         public MortgageSaveSnapshot Mortgage { get; set; }
     }
 
+    [Serializable]
+    public class StockPriceSaveSnapshot
+    {
+        public string Ticker { get; set; }
+        public long CurrentPriceCents { get; set; }
+        public long PreviousDayPriceCents { get; set; }
+        public List<long> PriceHistoryCents { get; set; } = new List<long>();
+    }
+
+    [Serializable]
+    public class StockPositionSaveSnapshot
+    {
+        public string Ticker { get; set; }
+        public int SharesOwned { get; set; }
+        public long TotalInvestedCents { get; set; }
+        public long TotalDividendsCents { get; set; }
+    }
+
+    [Serializable]
+    public class GoalSaveSnapshot
+    {
+        public string GoalId { get; set; }
+        public bool IsCompleted { get; set; }
+        public long CurrentValue { get; set; }
+        public long CompletedDateUnix { get; set; }
+    }
+
     /// <summary>
     /// Versioned, portable save schema for RichRich Life & Wealth Simulation.
-    /// Schema Version 5 supports Real Estate & Property Investments, Mortgages, and Rental Portfolios.
-    /// Backward-compatible with Schema 1, 2, 3, and 4.
+    /// Schema Version 7 supports Milestones, FIRE Progress, and Dynamic Macro Events.
+    /// Backward-compatible with Schema 1, 2, 3, 4, 5, and 6.
     /// Serializes to clean human-readable JSON with zero personal data.
     /// </summary>
     [Serializable]
     public class SaveData
     {
-        public int SchemaVersion { get; set; } = 5;
+        public int SchemaVersion { get; set; } = 7;
         public long CreatedAtUnix { get; set; }
         public long LastSavedUnix { get; set; }
 
@@ -174,6 +201,17 @@ namespace RichRich.Domain.Persistence
         // Real Estate & Property Investments (Schema 5)
         public List<PropertySaveSnapshot> Properties { get; set; } = new List<PropertySaveSnapshot>();
 
+        // Financial Markets & Investment Portfolio (Schema 6)
+        public string MarketSentiment { get; set; } = "Bullish";
+        public int MarketSentimentDaysRemaining { get; set; } = 30;
+        public List<StockPriceSaveSnapshot> StockPrices { get; set; } = new List<StockPriceSaveSnapshot>();
+        public List<StockPositionSaveSnapshot> StockHoldings { get; set; } = new List<StockPositionSaveSnapshot>();
+
+        // Life Progression & Events (Schema 7)
+        public List<GoalSaveSnapshot> Goals { get; set; } = new List<GoalSaveSnapshot>();
+        public int DaysUntilNextLifeEvent { get; set; } = 25;
+        public string PendingLifeEventId { get; set; }
+
         // Legacy / Schema 1 Fields (Preserved for backwards compatibility)
         public int CurrentLevel { get; set; } = 1;
         public int Tickets { get; set; } = EconomyConfig.StartingTickets;
@@ -191,7 +229,7 @@ namespace RichRich.Domain.Persistence
             Currency startCash = GameStartConfig.GetStartingCash(difficulty);
             return new SaveData
             {
-                SchemaVersion = 5,
+                SchemaVersion = 7,
                 CreatedAtUnix = currentUnix,
                 LastSavedUnix = currentUnix,
                 Difficulty = difficulty.ToString(),
@@ -208,6 +246,13 @@ namespace RichRich.Domain.Persistence
                 AgencyProjects = new List<AgencyProjectSaveSnapshot>(),
                 ActiveRepairJobs = new List<AutoRepairJobSaveSnapshot>(),
                 Properties = new List<PropertySaveSnapshot>(),
+                MarketSentiment = "Bullish",
+                MarketSentimentDaysRemaining = 30,
+                StockPrices = new List<StockPriceSaveSnapshot>(),
+                StockHoldings = new List<StockPositionSaveSnapshot>(),
+                Goals = new List<GoalSaveSnapshot>(),
+                DaysUntilNextLifeEvent = 25,
+                PendingLifeEventId = null,
                 CurrentJobId = null,
                 TotalMonthsWorked = 0,
                 CurrentJobTenureMonths = 0,

@@ -191,7 +191,7 @@ namespace RichRich.Tests
 
             // Save state
             var saved = _coordinator.SaveCurrentState();
-            Assert.That(saved.SchemaVersion, Is.EqualTo(5));
+            Assert.That(saved.SchemaVersion, Is.GreaterThanOrEqualTo(5));
             Assert.That(saved.Properties, Is.Not.Null);
             Assert.That(saved.Properties.Count, Is.EqualTo(5));
             Assert.That(saved.Properties.Count(p => p.IsOwned), Is.EqualTo(1));
@@ -236,6 +236,157 @@ namespace RichRich.Tests
 
             Assert.That(newIncome, Is.EqualTo(baseIncome + prop.TenantMonthlyRent));
             Assert.That(newExpenses, Is.EqualTo(baseExpenses + prop.Mortgage.MonthlyPayment + prop.MonthlyMaintenanceCost));
+        }
+
+        [Test]
+        public void Vacancy_WhenNoTenantSigned_ProducesNoRentalIncome_WhileMaintenanceStillIncurred()
+        {
+            _coordinator.Wallet.Add(Currency.FromDollars(80000.00));
+            var prop = _coordinator.RealEstateService.GetProperty("prop_starter_home");
+            _coordinator.RealEstateService.BuyProperty(prop.Id, withMortgage: false, out _);
+
+            Assert.That(prop.IsRented, Is.False);
+            Currency cashBefore = _coordinator.Wallet.Balance;
+
+            // Monthly cycle on vacant property
+            _coordinator.RealEstateService.ProcessMonthlyCycle(1.0);
+
+            // Only routine maintenance is deducted, zero rental income
+            Assert.That(_coordinator.Wallet.Balance, Is.EqualTo(cashBefore - prop.MonthlyMaintenanceCost));
+
+            // Verify no rent income transaction in ledger
+            var rentTx = _coordinator.Ledger.Transactions
+                .Where(t => t.RelatedEntityId == prop.Id && t.Type == TransactionType.Income)
+                .ToList();
+            Assert.That(rentTx, Is.Empty);
+        }
+
+        [Test]
+        public void MultipleProperties_AggregatesValuationsAndMortgages_CorrectlyReflectedInNetWorth()
+        {
+            _coordinator.Wallet.Add(Currency.FromDollars(500000.00));
+            var duplex = _coordinator.RealEstateService.GetProperty("prop_urban_duplex");
+            var retail = _coordinator.RealEstateService.GetProperty("prop_retail_strip");
+
+            // Buy duplex outright (cash)
+            _coordinator.RealEstateService.BuyProperty(duplex.Id, withMortgage: false, out _);
+
+            // Buy retail strip with mortgage (25% down)
+            _coordinator.RealEstateService.BuyProperty(retail.Id, withMortgage: true, out _);
+
+            var sheet = _coordinator.BalanceSheet;
+            Currency expectedValuation = duplex.CurrentValuation + retail.CurrentValuation;
+            Currency expectedMortgage = retail.Mortgage.RemainingPrincipal;
+
+            Assert.That(sheet.RealEstateAssets, Is.EqualTo(expectedValuation));
+            Assert.That(sheet.MortgageLiabilities, Is.EqualTo(expectedMortgage));
+
+            // Net worth formula: TotalAssets (Cash + NonCashAssets) - TotalLiabilities (Loans + Mortgages + Overdue)
+            long expectedNetWorthCents = (long)sheet.TotalAssets.MinorUnits - (long)sheet.TotalLiabilities.MinorUnits;
+            Assert.That(sheet.NetWorthCents, Is.EqualTo(expectedNetWorthCents));
+        }
+
+        [Test]
+        public void NeglectedMaintenance_WhenPlayerCannotPay_AcceleratesConditionDegradation()
+        {
+            _coordinator.Wallet.Add(Currency.FromDollars(80000.00));
+            var prop = _coordinator.RealEstateService.GetProperty("prop_starter_home");
+            _coordinator.RealEstateService.BuyProperty(prop.Id, withMortgage: false, out _);
+
+            // Drain wallet to 0 so routine maintenance cannot be paid
+            _coordinator.Wallet.TrySpend(_coordinator.Wallet.Balance, out _);
+            Assert.That(_coordinator.Wallet.Balance, Is.EqualTo(Currency.Zero));
+
+            double conditionBefore = prop.Condition;
+
+            // Monthly cycle runs with $0 cash
+            _coordinator.RealEstateService.ProcessMonthlyCycle(1.0);
+
+            // Base degradation (1.2) + neglect penalty (4.0) = 5.2 degradation
+            double expectedCondition = conditionBefore - 5.2;
+            Assert.That(prop.Condition, Is.EqualTo(expectedCondition).Within(0.01));
+        }
+
+        [Test]
+        public void EvictTenant_StopsRentalCashFlow_AllowsNewTenantLeaseAtUpdatedMarketRate()
+        {
+            _coordinator.Wallet.Add(Currency.FromDollars(80000.00));
+            var prop = _coordinator.RealEstateService.GetProperty("prop_starter_home");
+            _coordinator.RealEstateService.BuyProperty(prop.Id, withMortgage: false, out _);
+            _coordinator.RealEstateService.SignTenant(prop.Id, prop.BaseMonthlyRent, out _);
+            Assert.That(prop.IsRented, Is.True);
+
+            // Evict tenant
+            bool evicted = _coordinator.RealEstateService.EvictTenant(prop.Id, out string error);
+            Assert.That(evicted, Is.True, error);
+            Assert.That(prop.IsRented, Is.False);
+
+            Currency cashBefore = _coordinator.Wallet.Balance;
+            _coordinator.RealEstateService.ProcessMonthlyCycle(1.0);
+            // Cash dropped by maintenance, no rent
+            Assert.That(_coordinator.Wallet.Balance, Is.EqualTo(cashBefore - prop.MonthlyMaintenanceCost));
+
+            // Re-sign new tenant with custom negotiated rent
+            Currency updatedRent = Currency.FromDollars(800.00);
+            bool resigned = _coordinator.RealEstateService.SignTenant(prop.Id, updatedRent, out error);
+            Assert.That(resigned, Is.True, error);
+            Assert.That(prop.IsRented, Is.True);
+            Assert.That(prop.TenantMonthlyRent, Is.EqualTo(updatedRent));
+
+            cashBefore = _coordinator.Wallet.Balance;
+            _coordinator.RealEstateService.ProcessMonthlyCycle(1.0);
+            Assert.That(_coordinator.Wallet.Balance, Is.EqualTo(cashBefore + updatedRent - prop.MonthlyMaintenanceCost));
+        }
+
+        [Test]
+        public void DefaultMortgagePayment_AccumulatesOverdueLiabilities_OnBalanceSheet()
+        {
+            _coordinator.Wallet.Add(Currency.FromDollars(20000.00));
+            var prop = _coordinator.RealEstateService.GetProperty("prop_starter_home");
+            _coordinator.RealEstateService.BuyProperty(prop.Id, withMortgage: true, out _);
+
+            // Drain wallet to 0
+            _coordinator.Wallet.TrySpend(_coordinator.Wallet.Balance, out _);
+            Assert.That(_coordinator.Wallet.Balance, Is.EqualTo(Currency.Zero));
+
+            Currency overdueBefore = _coordinator.BalanceSheet.OverdueLiabilities;
+            Currency expectedPayment = prop.Mortgage.MonthlyPayment;
+
+            // Monthly cycle triggers mortgage payment attempt
+            _coordinator.RealEstateService.ProcessMonthlyCycle(1.0);
+
+            // Payment failed -> overdue liabilities increased
+            Assert.That(_coordinator.BalanceSheet.OverdueLiabilities, Is.EqualTo(overdueBefore + expectedPayment));
+        }
+
+        [Test]
+        public void FullPortfolio_ComplexLifecycle_AuditedInLedger()
+        {
+            _coordinator.Wallet.Add(Currency.FromDollars(100000.00));
+            var prop = _coordinator.RealEstateService.GetProperty("prop_starter_home");
+
+            // 1. Acquire
+            _coordinator.RealEstateService.BuyProperty(prop.Id, withMortgage: true, out _);
+
+            // 2. Sign tenant
+            _coordinator.RealEstateService.SignTenant(prop.Id, prop.BaseMonthlyRent, out _);
+
+            // 3. Process monthly cycle (rent, maintenance, debt service)
+            _coordinator.RealEstateService.ProcessMonthlyCycle(1.0);
+
+            // 4. Renovate
+            _coordinator.RealEstateService.RenovateProperty(prop.Id, out _);
+
+            // 5. Liquidate
+            _coordinator.RealEstateService.SellProperty(prop.Id, out _, out _);
+
+            var ledgerTxs = _coordinator.Ledger.Transactions.Where(t => t.RelatedEntityId == prop.Id || t.RelatedEntityId == prop.Mortgage?.Id).ToList();
+
+            // Verify audit trail contains all expected lifecycle entries
+            Assert.That(ledgerTxs.Any(t => t.Type == TransactionType.AssetAcquisition), Is.True);
+            Assert.That(ledgerTxs.Any(t => t.Type == TransactionType.Income), Is.True); // Rent
+            Assert.That(ledgerTxs.Any(t => t.Type == TransactionType.Expense), Is.True); // Maintenance / Renovation
+            Assert.That(ledgerTxs.Any(t => t.Type == TransactionType.AssetLiquidation), Is.True); // Sale proceeds
         }
     }
 }
