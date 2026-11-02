@@ -36,6 +36,17 @@ namespace RichRich.Presentation.Views
         [SerializeField] private Text _energyStatusText;
         [SerializeField] private Text _fatigueStatusText;
 
+        [Header("v0.3.0 Bottom Navigation Dock")]
+        [SerializeField] private Button _dockMetropolisButton;
+        [SerializeField] private Button _dockCareerButton;
+        [SerializeField] private Button _dockEnterpriseButton;
+        [SerializeField] private Button _dockWealthButton;
+
+        [Header("v0.3.0 Category Portal Modals")]
+        [SerializeField] private GameObject _careerPortalModalRoot;
+        [SerializeField] private GameObject _enterprisePortalModalRoot;
+        [SerializeField] private GameObject _wealthPortalModalRoot;
+
         [Header("Navigation Buttons & Modals")]
         [SerializeField] private Button _jobBoardOpenButton;
         [SerializeField] private GameObject _jobBoardModalRoot;
@@ -115,82 +126,133 @@ namespace RichRich.Presentation.Views
                 _sleepButton.onClick.AddListener(() => _controller.SleepToNextMorning());
             }
 
+            if (_dockMetropolisButton != null)
+            {
+                _dockMetropolisButton.onClick.AddListener(() =>
+                {
+                    if (ModalManager.Instance != null)
+                    {
+                        ModalManager.Instance.CloseAll();
+                    }
+                    var city = FindObjectOfType<CityInteractionController>();
+                    if (city != null)
+                    {
+                        city.SetCityExploreMode(true);
+                    }
+                });
+            }
+
+            if (_dockCareerButton != null && _careerPortalModalRoot != null)
+            {
+                _dockCareerButton.onClick.AddListener(() => OpenRootModal(_careerPortalModalRoot));
+            }
+
+            if (_dockEnterpriseButton != null && _enterprisePortalModalRoot != null)
+            {
+                _dockEnterpriseButton.onClick.AddListener(() => OpenRootModal(_enterprisePortalModalRoot));
+            }
+
+            if (_dockWealthButton != null && _wealthPortalModalRoot != null)
+            {
+                _dockWealthButton.onClick.AddListener(() => OpenRootModal(_wealthPortalModalRoot));
+            }
+
             if (_jobBoardOpenButton != null && _jobBoardModalRoot != null)
             {
-                _jobBoardOpenButton.onClick.AddListener(() => OpenRootModal(_jobBoardModalRoot));
+                _jobBoardOpenButton.onClick.AddListener(() => OpenSubsystemModal(_jobBoardModalRoot));
             }
 
             if (_educationOpenButton != null && _educationModalRoot != null)
             {
-                _educationOpenButton.onClick.AddListener(() => OpenRootModal(_educationModalRoot));
+                _educationOpenButton.onClick.AddListener(() => OpenSubsystemModal(_educationModalRoot));
             }
 
             if (_housingOpenButton != null && _housingModalRoot != null)
             {
-                _housingOpenButton.onClick.AddListener(() => OpenRootModal(_housingModalRoot));
+                _housingOpenButton.onClick.AddListener(() => OpenSubsystemModal(_housingModalRoot));
             }
 
             if (_lifestyleOpenButton != null && _lifestyleModalRoot != null)
             {
-                _lifestyleOpenButton.onClick.AddListener(() => OpenRootModal(_lifestyleModalRoot));
+                _lifestyleOpenButton.onClick.AddListener(() => OpenSubsystemModal(_lifestyleModalRoot));
             }
 
             if (_businessMarketplaceOpenButton != null && _businessMarketplaceModalRoot != null)
             {
-                _businessMarketplaceOpenButton.onClick.AddListener(() => OpenRootModal(_businessMarketplaceModalRoot));
+                _businessMarketplaceOpenButton.onClick.AddListener(() => OpenSubsystemModal(_businessMarketplaceModalRoot));
             }
 
             if (_businessDashboardOpenButton != null && _businessDashboardModalRoot != null)
             {
-                _businessDashboardOpenButton.onClick.AddListener(() => OpenRootModal(_businessDashboardModalRoot));
+                _businessDashboardOpenButton.onClick.AddListener(() => OpenSubsystemModal(_businessDashboardModalRoot));
             }
 
             if (_autoRepairOpenButton != null && _autoRepairModalRoot != null)
             {
-                _autoRepairOpenButton.onClick.AddListener(() => OpenRootModal(_autoRepairModalRoot));
+                _autoRepairOpenButton.onClick.AddListener(() => OpenSubsystemModal(_autoRepairModalRoot));
             }
 
             if (_convenienceStoreOpenButton != null && _convenienceStoreModalRoot != null)
             {
-                _convenienceStoreOpenButton.onClick.AddListener(() => OpenRootModal(_convenienceStoreModalRoot));
+                _convenienceStoreOpenButton.onClick.AddListener(() => OpenSubsystemModal(_convenienceStoreModalRoot));
             }
 
             if (_digitalAgencyOpenButton != null && _digitalAgencyModalRoot != null)
             {
-                _digitalAgencyOpenButton.onClick.AddListener(() => OpenRootModal(_digitalAgencyModalRoot));
+                _digitalAgencyOpenButton.onClick.AddListener(() => OpenSubsystemModal(_digitalAgencyModalRoot));
             }
 
             if (_businessEmployeeOpenButton != null && _businessEmployeeModalRoot != null)
             {
-                _businessEmployeeOpenButton.onClick.AddListener(() => OpenRootModal(_businessEmployeeModalRoot));
+                _businessEmployeeOpenButton.onClick.AddListener(() => OpenSubsystemModal(_businessEmployeeModalRoot));
             }
 
             if (_businessFinanceOpenButton != null && _businessFinanceModalRoot != null)
             {
-                _businessFinanceOpenButton.onClick.AddListener(() => OpenRootModal(_businessFinanceModalRoot));
+                _businessFinanceOpenButton.onClick.AddListener(() => OpenSubsystemModal(_businessFinanceModalRoot));
             }
 
             if (_realEstateOpenButton != null && _realEstateModalRoot != null)
             {
-                _realEstateOpenButton.onClick.AddListener(() => OpenRootModal(_realEstateModalRoot));
+                _realEstateOpenButton.onClick.AddListener(() => OpenSubsystemModal(_realEstateModalRoot));
             }
 
             if (_stockMarketOpenButton != null && _stockMarketModalRoot != null)
             {
-                _stockMarketOpenButton.onClick.AddListener(() => OpenRootModal(_stockMarketModalRoot));
+                _stockMarketOpenButton.onClick.AddListener(() => OpenSubsystemModal(_stockMarketModalRoot));
             }
 
             if (_goalsOpenButton != null && _goalsModalRoot != null)
             {
-                _goalsOpenButton.onClick.AddListener(() => OpenRootModal(_goalsModalRoot));
+                _goalsOpenButton.onClick.AddListener(() => OpenSubsystemModal(_goalsModalRoot));
             }
 
             if (_settingsOpenButton != null && _settingsModalRoot != null)
             {
-                _settingsOpenButton.onClick.AddListener(() => OpenRootModal(_settingsModalRoot));
+                _settingsOpenButton.onClick.AddListener(() => OpenSubsystemModal(_settingsModalRoot));
             }
 
             RefreshUI();
+        }
+
+        private void OpenSubsystemModal(GameObject modalRoot)
+        {
+            if (modalRoot == null) return;
+            if (ModalManager.Instance != null)
+            {
+                if (ModalManager.Instance.HasActiveModals)
+                {
+                    ModalManager.Instance.PushChild(modalRoot);
+                }
+                else
+                {
+                    ModalManager.Instance.OpenRoot(modalRoot);
+                }
+            }
+            else
+            {
+                modalRoot.SetActive(true);
+            }
         }
 
         private void OpenRootModal(GameObject modalRoot)

@@ -89,111 +89,83 @@ namespace RichRich.Editor
             StretchFull(hudGo);
             var hudView = hudGo.AddComponent<MainHUDView>();
 
-            // Scrollable Content Container for HUD
-            var scrollRoot = CreateUIObject("ScrollContent", hudGo);
-            StretchFull(scrollRoot);
+            // --- v0.3.0 Floating Translucent Financial Overview Card ---
+            var financeCard = CreatePanel("FinanceCard", hudGo, new Color(0.07f, 0.11f, 0.19f, 0.90f), "Assets/Sprites/UI/card_bg_9slice.png");
+            SetRect(financeCard, 0, 1, 1, 1, 0, -370, 0, 0);
 
-            // --- HUD Top Header Bar ---
-            var headerGo = CreatePanel("HeaderBar", scrollRoot, new Color(0.08f, 0.12f, 0.20f, 0.95f));
-            SetRect(headerGo, 0, 1, 1, 1, 0, -140, 0, 0);
+            // Floating Currency Feedback (attached directly to financeCard)
+            var currencyFeedback = financeCard.AddComponent<FloatingCurrencyFeedback>();
 
-            var titleText = CreateText("AppTitle", headerGo, "RichRich: Life & Enterprise", 36, new Color(0.98f, 0.75f, 0.18f), FontStyle.Bold, TextAnchor.MiddleLeft);
-            SetRect(titleText.gameObject, 0, 0.5f, 0.6f, 1, 20, 0, 0, 0);
+            // Header Row: App Title & Game Calendar Clock
+            var titleText = CreateText("AppTitle", financeCard, "RichRich: Metropolis", 32, new Color(0.98f, 0.78f, 0.22f), FontStyle.Bold, TextAnchor.MiddleLeft);
+            SetRect(titleText.gameObject, 0, 0.82f, 0.50f, 0.98f, 20, 0, 0, 0);
 
-            var dateText = CreateText("DateText", headerGo, "Year 1, Month 1 - Day 1", 26, new Color(0.70f, 0.78f, 0.90f), FontStyle.Normal, TextAnchor.MiddleLeft);
-            SetRect(dateText.gameObject, 0, 0, 0.6f, 0.5f, 20, 0, 0, 0);
+            var dateText = CreateText("DateText", financeCard, "Year 1, Month 1 - Day 1", 22, new Color(0.72f, 0.80f, 0.92f), FontStyle.Normal, TextAnchor.MiddleLeft);
+            SetRect(dateText.gameObject, 0, 0.70f, 0.50f, 0.84f, 20, 0, 0, 0);
 
-            var speedText = CreateText("SpeedText", headerGo, "1x (Normal)", 24, new Color(0.35f, 0.80f, 0.98f), FontStyle.Bold, TextAnchor.MiddleRight);
-            SetRect(speedText.gameObject, 0.6f, 0.5f, 1, 1, 0, 0, -20, 0);
+            var speedText = CreateText("SpeedText", financeCard, "1x (Normal)", 22, new Color(0.35f, 0.80f, 0.98f), FontStyle.Bold, TextAnchor.MiddleRight);
+            SetRect(speedText.gameObject, 0.50f, 0.82f, 1f, 0.98f, 0, 0, -20, 0);
 
-            // Clock Controls
-            var pauseBtn = CreateButton("PauseBtn", headerGo, "Pause", new Color(0.20f, 0.28f, 0.40f), Color.white);
-            SetRect(pauseBtn.gameObject, 0.60f, 0.05f, 0.72f, 0.45f, 0, 0, -4, 0);
+            // Simulation Clock Controls
+            var pauseBtn = CreateButton("PauseBtn", financeCard, "⏸", new Color(0.16f, 0.22f, 0.35f), Color.white, "Assets/Sprites/UI/btn_dark_9slice.png");
+            SetRect(pauseBtn.gameObject, 0.54f, 0.70f, 0.64f, 0.84f, 0, 0, -4, 0);
 
-            var normBtn = CreateButton("NormalSpeedBtn", headerGo, "1x", new Color(0.20f, 0.28f, 0.40f), Color.white);
-            SetRect(normBtn.gameObject, 0.73f, 0.05f, 0.81f, 0.45f, 0, 0, -4, 0);
+            var normBtn = CreateButton("NormalSpeedBtn", financeCard, "1x", new Color(0.16f, 0.22f, 0.35f), Color.white, "Assets/Sprites/UI/btn_dark_9slice.png");
+            SetRect(normBtn.gameObject, 0.65f, 0.70f, 0.75f, 0.84f, 0, 0, -4, 0);
 
-            var fastBtn = CreateButton("FastSpeedBtn", headerGo, "5x", new Color(0.20f, 0.28f, 0.40f), Color.white);
-            SetRect(fastBtn.gameObject, 0.82f, 0.05f, 0.90f, 0.45f, 0, 0, -4, 0);
+            var fastBtn = CreateButton("FastSpeedBtn", financeCard, "5x", new Color(0.16f, 0.22f, 0.35f), Color.white, "Assets/Sprites/UI/btn_dark_9slice.png");
+            SetRect(fastBtn.gameObject, 0.76f, 0.70f, 0.86f, 0.84f, 0, 0, -4, 0);
 
-            var sleepBtn = CreateButton("SleepBtn", headerGo, "Sleep", new Color(0.35f, 0.25f, 0.55f), Color.white);
-            SetRect(sleepBtn.gameObject, 0.91f, 0.05f, 0.99f, 0.45f, 0, 0, -4, 0);
+            var sleepBtn = CreateButton("SleepBtn", financeCard, "💤", new Color(0.32f, 0.22f, 0.50f), Color.white, "Assets/Sprites/UI/btn_dark_9slice.png");
+            SetRect(sleepBtn.gameObject, 0.87f, 0.70f, 0.98f, 0.84f, 0, 0, -4, 0);
 
-            // --- HUD Financial Metrics Card ---
-            var financeCard = CreatePanel("FinanceCard", scrollRoot, new Color(0.09f, 0.14f, 0.24f, 0.90f));
-            SetRect(financeCard, 0, 1, 1, 1, 0, -360, 0, -155);
+            // Hero Financial Row: Liquid Cash & Net Worth
+            var cashLabel = CreateText("CashLabel", financeCard, "Liquid Cash Balance", 20, new Color(0.60f, 0.68f, 0.80f), FontStyle.Normal, TextAnchor.MiddleLeft);
+            SetRect(cashLabel.gameObject, 0, 0.54f, 0.50f, 0.68f, 20, 0, 0, 0);
 
-            var cashLabel = CreateText("CashLabel", financeCard, "Liquid Cash Balance", 24, new Color(0.58f, 0.65f, 0.78f), FontStyle.Normal, TextAnchor.UpperLeft);
-            SetRect(cashLabel.gameObject, 0, 0.70f, 0.5f, 1, 24, 0, 0, -12);
+            var cashText = CreateText("CashText", financeCard, "$3,000.00", 48, new Color(0.18f, 0.85f, 0.45f), FontStyle.Bold, TextAnchor.MiddleLeft);
+            SetRect(cashText.gameObject, 0, 0.38f, 0.55f, 0.56f, 20, 0, 0, 0);
 
-            var cashText = CreateText("CashText", financeCard, "$3,000.00", 52, new Color(0.18f, 0.85f, 0.45f), FontStyle.Bold, TextAnchor.MiddleLeft);
-            SetRect(cashText.gameObject, 0, 0.35f, 0.6f, 0.75f, 24, 0, 0, 0);
+            var netWorthText = CreateText("NetWorthText", financeCard, "Net Worth: $3,000.00", 24, Color.white, FontStyle.Bold, TextAnchor.MiddleRight);
+            SetRect(netWorthText.gameObject, 0.50f, 0.52f, 1f, 0.68f, 0, 0, -20, 0);
 
-            var netWorthText = CreateText("NetWorthText", financeCard, "Net Worth: $3,000.00", 28, Color.white, FontStyle.Bold, TextAnchor.MiddleRight);
-            SetRect(netWorthText.gameObject, 0.5f, 0.55f, 1, 0.85f, 0, 0, -24, 0);
+            var healthBadge = CreateText("HealthBadge", financeCard, "Status: Solvent", 22, new Color(0.40f, 0.92f, 0.60f), FontStyle.Bold, TextAnchor.MiddleRight);
+            SetRect(healthBadge.gameObject, 0.50f, 0.38f, 1f, 0.52f, 0, 0, -20, 0);
 
-            var healthBadge = CreateText("HealthBadge", financeCard, "Status: Solvent", 26, new Color(0.40f, 0.92f, 0.60f), FontStyle.Bold, TextAnchor.MiddleRight);
-            SetRect(healthBadge.gameObject, 0.5f, 0.35f, 1, 0.55f, 0, 0, -24, 0);
+            // Monthly Metrics Strip: Income, Expenses, Cashflow
+            var incomeText = CreateText("IncomeText", financeCard, "+$0.00/mo", 22, new Color(0.30f, 0.85f, 0.50f), FontStyle.Bold, TextAnchor.MiddleLeft);
+            SetRect(incomeText.gameObject, 0, 0.24f, 0.33f, 0.38f, 20, 0, 0, 0);
 
-            var incomeText = CreateText("IncomeText", financeCard, "+$0.00/mo", 24, new Color(0.30f, 0.85f, 0.50f), FontStyle.Normal, TextAnchor.MiddleLeft);
-            SetRect(incomeText.gameObject, 0, 0.05f, 0.33f, 0.32f, 24, 0, 0, 0);
+            var expenseText = CreateText("ExpenseText", financeCard, "-$0.00/mo", 22, new Color(0.95f, 0.40f, 0.40f), FontStyle.Bold, TextAnchor.MiddleCenter);
+            SetRect(expenseText.gameObject, 0.33f, 0.24f, 0.66f, 0.38f, 0, 0, 0, 0);
 
-            var expenseText = CreateText("ExpenseText", financeCard, "-$0.00/mo", 24, new Color(0.95f, 0.40f, 0.40f), FontStyle.Normal, TextAnchor.MiddleCenter);
-            SetRect(expenseText.gameObject, 0.33f, 0.05f, 0.66f, 0.32f, 0, 0, 0, 0);
+            var flowText = CreateText("FlowText", financeCard, "Flow: +$0.00/mo", 22, new Color(0.40f, 0.75f, 0.98f), FontStyle.Bold, TextAnchor.MiddleRight);
+            SetRect(flowText.gameObject, 0.66f, 0.24f, 1f, 0.38f, 0, 0, -20, 0);
 
-            var flowText = CreateText("FlowText", financeCard, "Cash Flow: +$0.00/mo", 24, new Color(0.40f, 0.75f, 0.98f), FontStyle.Normal, TextAnchor.MiddleRight);
-            SetRect(flowText.gameObject, 0.66f, 0.05f, 1, 0.32f, 0, 0, -24, 0);
+            // Status Chips: Career, Education, Housing, Energy, Fatigue
+            var careerText = CreateText("CareerText", financeCard, "Career: Unemployed", 20, Color.white, FontStyle.Normal, TextAnchor.MiddleLeft);
+            SetRect(careerText.gameObject, 0, 0.12f, 0.50f, 0.24f, 20, 0, 0, 0);
 
-            // --- HUD Lifestyle & Career Status Card ---
-            var statusCard = CreatePanel("StatusCard", scrollRoot, new Color(0.09f, 0.14f, 0.24f, 0.90f));
-            SetRect(statusCard, 0, 1, 1, 1, 0, -560, 0, -375);
+            var eduText = CreateText("EducationText", financeCard, "Study: None", 20, new Color(0.80f, 0.85f, 0.95f), FontStyle.Normal, TextAnchor.MiddleLeft);
+            SetRect(eduText.gameObject, 0, 0.01f, 0.50f, 0.13f, 20, 0, 0, 0);
 
-            var careerText = CreateText("CareerText", statusCard, "Career: Unemployed", 26, Color.white, FontStyle.Normal, TextAnchor.MiddleLeft);
-            SetRect(careerText.gameObject, 0, 0.68f, 0.5f, 0.98f, 24, 0, 0, 0);
+            var housingText = CreateText("HousingText", financeCard, "Housing: Homeless", 20, new Color(0.95f, 0.80f, 0.35f), FontStyle.Normal, TextAnchor.MiddleRight);
+            SetRect(housingText.gameObject, 0.50f, 0.12f, 1f, 0.24f, 0, 0, -20, 0);
 
-            var eduText = CreateText("EducationText", statusCard, "Study: None", 26, new Color(0.80f, 0.85f, 0.95f), FontStyle.Normal, TextAnchor.MiddleLeft);
-            SetRect(eduText.gameObject, 0, 0.36f, 0.5f, 0.66f, 24, 0, 0, 0);
+            var energyText = CreateText("EnergyText", financeCard, "Energy: 100/100", 20, new Color(0.35f, 0.80f, 0.98f), FontStyle.Normal, TextAnchor.MiddleRight);
+            SetRect(energyText.gameObject, 0.50f, 0.01f, 0.75f, 0.13f, 0, 0, -10, 0);
 
-            var housingText = CreateText("HousingText", statusCard, "Housing: Homeless", 26, new Color(0.95f, 0.80f, 0.35f), FontStyle.Normal, TextAnchor.MiddleLeft);
-            SetRect(housingText.gameObject, 0, 0.04f, 0.5f, 0.34f, 24, 0, 0, 0);
+            var fatigueText = CreateText("FatigueText", financeCard, "Rested", 20, new Color(0.40f, 0.90f, 0.60f), FontStyle.Normal, TextAnchor.MiddleRight);
+            SetRect(fatigueText.gameObject, 0.75f, 0.01f, 1f, 0.13f, 0, 0, -20, 0);
 
-            var energyText = CreateText("EnergyText", statusCard, "Energy: 100/100", 26, new Color(0.35f, 0.80f, 0.98f), FontStyle.Normal, TextAnchor.MiddleRight);
-            SetRect(energyText.gameObject, 0.5f, 0.52f, 1, 0.98f, 0, 0, -24, 0);
+            // --- v0.3.0 Bottom Navigation Dock (4 Category Anchors) ---
+            var dockPanel = CreatePanel("BottomNavigationDock", hudGo, new Color(0.06f, 0.09f, 0.16f, 0.96f), "Assets/Sprites/UI/dock_bg_9slice.png");
+            SetRect(dockPanel, 0, 0, 1, 0, 0, 0, 0, 160);
 
-            var fatigueText = CreateText("FatigueText", statusCard, "Fatigue: Well-Rested", 26, new Color(0.40f, 0.90f, 0.60f), FontStyle.Normal, TextAnchor.MiddleRight);
-            SetRect(fatigueText.gameObject, 0.5f, 0.04f, 1, 0.50f, 0, 0, -24, 0);
-
-            // --- Navigation Buttons Panel (Grid of Subsystem Modals) ---
-            var navPanel = CreatePanel("NavGridPanel", scrollRoot, new Color(0.07f, 0.10f, 0.18f, 0.85f));
-            SetRect(navPanel, 0, 0, 1, 1, 0, 0, 0, -645);
-
-            var gridTitle = CreateText("GridTitle", navPanel, "Simulated Subsystems & Enterprise Portals", 26, new Color(0.60f, 0.70f, 0.85f), FontStyle.Bold, TextAnchor.UpperLeft);
-            SetRect(gridTitle.gameObject, 0, 1, 1, 1, 24, -40, -24, -10);
-
-            // Navigation Action Buttons
-            var jobBtn = CreateNavButton("NavJobBtn", navPanel, "Career Board", 0, 1, 0.48f, 1, 10, -110, -5, -55);
-            var eduBtn = CreateNavButton("NavEduBtn", navPanel, "Education & Degrees", 0.52f, 1, 1, 1, 5, -110, -10, -55);
-
-            var houseBtn = CreateNavButton("NavHousingBtn", navPanel, "Housing & Leases", 0, 1, 0.48f, 1, 10, -175, -5, -120);
-            var lifeBtn = CreateNavButton("NavLifeBtn", navPanel, "Lifestyle & Rest", 0.52f, 1, 1, 1, 5, -175, -10, -120);
-
-            var mktBtn = CreateNavButton("NavMarketBtn", navPanel, "Enterprise Market", 0, 1, 0.48f, 1, 10, -240, -5, -185);
-            var dashBtn = CreateNavButton("NavDashBtn", navPanel, "Business Dashboard", 0.52f, 1, 1, 1, 5, -240, -10, -185);
-
-            var autoBtn = CreateNavButton("NavAutoBtn", navPanel, "Auto Repair Workshop", 0, 1, 0.48f, 1, 10, -305, -5, -250);
-            var storeBtn = CreateNavButton("NavStoreBtn", navPanel, "Corner Convenience", 0.52f, 1, 1, 1, 5, -305, -10, -250);
-
-            var agencyBtn = CreateNavButton("NavAgencyBtn", navPanel, "Digital Agency", 0, 1, 0.48f, 1, 10, -370, -5, -315);
-            var staffBtn = CreateNavButton("NavStaffBtn", navPanel, "Recruitment & HR", 0.52f, 1, 1, 1, 5, -370, -10, -315);
-
-            var finBtn = CreateNavButton("NavFinanceBtn", navPanel, "Commercial Debt & P&L", 0, 1, 0.48f, 1, 10, -435, -5, -380);
-            var realEstateBtn = CreateNavButton("NavRealEstateBtn", navPanel, "Real Estate Portfolio", 0.52f, 1, 1, 1, 5, -435, -10, -380);
-
-            var stockBtn = CreateNavButton("NavStockBtn", navPanel, "Equities & Markets", 0, 1, 0.48f, 1, 10, -500, -5, -445);
-            var goalsBtn = CreateNavButton("NavGoalsBtn", navPanel, "Goals & FIRE", 0.52f, 1, 1, 1, 5, -500, -10, -445);
-
-            var cityBtn = CreateNavButton("NavCity3DBtn", navPanel, "3D City Plaza", 0, 1, 0.48f, 1, 10, -565, -5, -510);
-            var setBtn = CreateNavButton("NavSettingsBtn", navPanel, "Settings & Persistence", 0.52f, 1, 1, 1, 5, -565, -10, -510);
+            var dockMetropolisBtn = CreateDockCategoryButton("DockMetropolisBtn", dockPanel, "Metropolis", "Assets/Sprites/Icons/icon_city.png", new Color(0.22f, 0.74f, 0.97f), 0.00f, 0.25f);
+            var dockCareerBtn = CreateDockCategoryButton("DockCareerBtn", dockPanel, "Life & Career", "Assets/Sprites/Icons/icon_career.png", new Color(0.20f, 0.85f, 0.50f), 0.25f, 0.50f);
+            var dockEnterpriseBtn = CreateDockCategoryButton("DockEnterpriseBtn", dockPanel, "Enterprises", "Assets/Sprites/Icons/icon_enterprise.png", new Color(0.96f, 0.75f, 0.20f), 0.50f, 0.75f);
+            var dockWealthBtn = CreateDockCategoryButton("DockWealthBtn", dockPanel, "Wealth", "Assets/Sprites/Icons/icon_wealth.png", new Color(0.65f, 0.55f, 0.98f), 0.75f, 1.00f);
 
             // Wire MainHUDView serialized fields
             SetPrivateField(hudView, "_cashBalanceText", cashText);
@@ -218,6 +190,16 @@ namespace RichRich.Editor
             var modalsRoot = CreateUIObject("Modals", canvasGo);
             StretchFull(modalsRoot);
             modalsRoot.AddComponent<ModalManager>();
+
+            // --- 7.0 Category Portal Modals (v0.3.0 Navigation Hubs) ---
+            var careerPortalModal = CreateModalSheet("CareerPortalModal", modalsRoot, "Life & Career Hub", out var careerPortalCloseBtn);
+            BuildCareerPortalUI(careerPortalModal, out var jobBtn, out var eduBtn, out var houseBtn, out var lifeBtn);
+
+            var enterprisePortalModal = CreateModalSheet("EnterprisePortalModal", modalsRoot, "Enterprise & Commercial Hub", out var enterprisePortalCloseBtn);
+            BuildEnterprisePortalUI(enterprisePortalModal, out var dashBtn, out var mktBtn, out var autoBtn, out var storeBtn, out var agencyBtn, out var staffBtn, out var finBtn);
+
+            var wealthPortalModal = CreateModalSheet("WealthPortalModal", modalsRoot, "Wealth & Investment Hub", out var wealthPortalCloseBtn);
+            BuildWealthPortalUI(wealthPortalModal, out var stockBtn, out var realEstateBtn, out var goalsBtn, out var setBtn);
 
             // --- 7.1 Job Board Modal ---
             var jobModal = CreateModalSheet("JobBoardModal", modalsRoot, "Career Board & Vacancies", out var jobCloseBtn);
@@ -302,7 +284,17 @@ namespace RichRich.Editor
             // Wire nested enterprise modals into BusinessDashboardView
             dashView.BindNestedModals(staffModal, finModal);
 
-            // Wire HUD Nav buttons to Modal roots
+            // Wire v0.3.0 Bottom Navigation Dock & Category Portals
+            SetPrivateField(hudView, "_dockMetropolisButton", dockMetropolisBtn);
+            SetPrivateField(hudView, "_dockCareerButton", dockCareerBtn);
+            SetPrivateField(hudView, "_dockEnterpriseButton", dockEnterpriseBtn);
+            SetPrivateField(hudView, "_dockWealthButton", dockWealthBtn);
+
+            SetPrivateField(hudView, "_careerPortalModalRoot", careerPortalModal);
+            SetPrivateField(hudView, "_enterprisePortalModalRoot", enterprisePortalModal);
+            SetPrivateField(hudView, "_wealthPortalModalRoot", wealthPortalModal);
+
+            // Wire Subsystem Nav buttons to Modal roots
             SetPrivateField(hudView, "_jobBoardOpenButton", jobBtn);
             SetPrivateField(hudView, "_jobBoardModalRoot", jobModal);
 
@@ -370,10 +362,10 @@ namespace RichRich.Editor
             SetPrivateField(bootstrapper, "_settingsView", setView);
 
             // 9. Original 3D Metropolitan City Environment
-            var cityCtrl = Build3DCityEnvironment(camGo, camera, canvasGo, scrollRoot, stockModal, finModal, realEstateModal, dashModal, housingModal, cityBtn);
+            var cityCtrl = Build3DCityEnvironment(camGo, camera, canvasGo, financeCard, stockModal, finModal, realEstateModal, dashModal, housingModal, dockMetropolisBtn);
 
             SetPrivateField(bootstrapper, "_cityController", cityCtrl);
-            SetPrivateField(bootstrapper, "_cityOpenButton", cityBtn);
+            SetPrivateField(bootstrapper, "_cityOpenButton", dockMetropolisBtn);
 
             // Mark objects dirty for serializer
             EditorUtility.SetDirty(bootstrapper);
@@ -1468,88 +1460,144 @@ namespace RichRich.Editor
             // 2. City Environment Parent
             var cityParent = new GameObject("City3DEnvironment");
 
-            // 3. Directional Key Light
+            // 3. Directional Key Light & Soft Fill Light
             var lightGo = new GameObject("CityDirectionalLight");
             lightGo.transform.SetParent(cityParent.transform, false);
             var light = lightGo.AddComponent<Light>();
             light.type = LightType.Directional;
-            light.color = new Color(0.95f, 0.92f, 0.88f);
-            light.intensity = 1.15f;
+            light.color = new Color(0.98f, 0.95f, 0.90f);
+            light.intensity = 1.25f;
             lightGo.transform.rotation = Quaternion.Euler(45f, -35f, 0f);
 
-            // 4. Ground Plaza
+            var fillLightGo = new GameObject("CityFillLight");
+            fillLightGo.transform.SetParent(cityParent.transform, false);
+            var fillLight = fillLightGo.AddComponent<Light>();
+            fillLight.type = LightType.Directional;
+            fillLight.color = new Color(0.40f, 0.50f, 0.70f);
+            fillLight.intensity = 0.45f;
+            fillLightGo.transform.rotation = Quaternion.Euler(30f, 145f, 0f);
+
+            // 4. Ground Plaza & Asphalt Avenues
             var ground = GameObject.CreatePrimitive(PrimitiveType.Cube);
             ground.name = "PlazaGround";
             ground.transform.SetParent(cityParent.transform, false);
             ground.transform.position = new Vector3(0, -0.25f, 1.5f);
             ground.transform.localScale = new Vector3(24f, 0.5f, 22f);
-            ground.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial(new Color(0.08f, 0.10f, 0.16f));
+            ground.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial(new Color(0.06f, 0.08f, 0.14f));
 
-            // Roads / Avenues
+            // Central Boulevard (Horizontal)
             var roadH = GameObject.CreatePrimitive(PrimitiveType.Cube);
             roadH.name = "CentralBoulevard";
             roadH.transform.SetParent(cityParent.transform, false);
             roadH.transform.position = new Vector3(0, 0.02f, 1.5f);
-            roadH.transform.localScale = new Vector3(24f, 0.05f, 2.5f);
-            roadH.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial(new Color(0.12f, 0.15f, 0.22f));
+            roadH.transform.localScale = new Vector3(24f, 0.05f, 2.8f);
+            roadH.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial(new Color(0.11f, 0.14f, 0.22f));
 
+            // Metro Avenue (Vertical)
             var roadV = GameObject.CreatePrimitive(PrimitiveType.Cube);
             roadV.name = "MetroAvenue";
             roadV.transform.SetParent(cityParent.transform, false);
             roadV.transform.position = new Vector3(0, 0.02f, 1.5f);
-            roadV.transform.localScale = new Vector3(2.5f, 0.05f, 22f);
-            roadV.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial(new Color(0.12f, 0.15f, 0.22f));
+            roadV.transform.localScale = new Vector3(2.8f, 0.05f, 22f);
+            roadV.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial(new Color(0.11f, 0.14f, 0.22f));
 
-            // 5. Stylized Interactive 3D Buildings
-            // 5.1 Stock Exchange Tower (Center)
+            // Dashed Road Markings (Horizontal Boulevard)
+            for (int i = -4; i <= 4; i++)
+            {
+                var dashH = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                dashH.name = $"DashH_{i}";
+                dashH.transform.SetParent(cityParent.transform, false);
+                dashH.transform.position = new Vector3(i * 2.5f, 0.06f, 1.5f);
+                dashH.transform.localScale = new Vector3(1.2f, 0.02f, 0.20f);
+                dashH.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial(new Color(0.85f, 0.90f, 0.95f));
+                GameObject.DestroyImmediate(dashH.GetComponent<Collider>());
+            }
+
+            // Dashed Road Markings (Vertical Metro Avenue)
+            for (int i = -3; i <= 4; i++)
+            {
+                var dashV = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                dashV.name = $"DashV_{i}";
+                dashV.transform.SetParent(cityParent.transform, false);
+                dashV.transform.position = new Vector3(0f, 0.06f, 1.5f + i * 2.5f);
+                dashV.transform.localScale = new Vector3(0.20f, 0.02f, 1.2f);
+                dashV.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial(new Color(0.85f, 0.90f, 0.95f));
+                GameObject.DestroyImmediate(dashV.GetComponent<Collider>());
+            }
+
+            // 5. Procedural Low-Poly Street Trees
+            CreateLowPolyTree("Tree_1", cityParent, new Vector3(-2.6f, 0f, 3.6f));
+            CreateLowPolyTree("Tree_2", cityParent, new Vector3( 2.6f, 0f, 3.6f));
+            CreateLowPolyTree("Tree_3", cityParent, new Vector3(-2.6f, 0f, -0.6f));
+            CreateLowPolyTree("Tree_4", cityParent, new Vector3( 2.6f, 0f, -0.6f));
+            CreateLowPolyTree("Tree_5", cityParent, new Vector3(-7.5f, 0f, 1.5f));
+            CreateLowPolyTree("Tree_6", cityParent, new Vector3( 7.5f, 0f, 1.5f));
+
+            // 6. Procedural Low-Poly Streetlights
+            CreateLowPolyStreetlight("Streetlight_1", cityParent, new Vector3(-1.8f, 0f, 3.2f));
+            CreateLowPolyStreetlight("Streetlight_2", cityParent, new Vector3( 1.8f, 0f, 3.2f));
+            CreateLowPolyStreetlight("Streetlight_3", cityParent, new Vector3(-1.8f, 0f, -0.2f));
+            CreateLowPolyStreetlight("Streetlight_4", cityParent, new Vector3( 1.8f, 0f, -0.2f));
+
+            // 7. Background Skyline Silhouettes (for Metropolitan Depth)
+            CreateBackgroundSkyscraper("Skyline_FarLeft", cityParent, new Vector3(-9.5f, 0, 10.0f), new Vector3(3.5f, 10.5f, 3.5f), new Color(0.05f, 0.08f, 0.14f));
+            CreateBackgroundSkyscraper("Skyline_CenterLeft", cityParent, new Vector3(-3.2f, 0, 11.5f), new Vector3(3.2f, 12.0f, 3.2f), new Color(0.04f, 0.07f, 0.12f));
+            CreateBackgroundSkyscraper("Skyline_CenterRight", cityParent, new Vector3( 3.2f, 0, 11.5f), new Vector3(3.2f, 11.5f, 3.2f), new Color(0.04f, 0.07f, 0.12f));
+            CreateBackgroundSkyscraper("Skyline_FarRight", cityParent, new Vector3( 9.5f, 0, 10.0f), new Vector3(3.5f, 9.8f, 3.5f), new Color(0.05f, 0.08f, 0.14f));
+
+            // 8. Stylized Interactive 3D Buildings
+            // 8.1 Stock Exchange Tower (Center)
             CreateStylizedBuilding("Building_StockExchange", cityParent,
-                new Vector3(0f, 0f, 4.5f),
-                new Vector3(3.2f, 8.5f, 3.2f),
-                new Color(0.12f, 0.18f, 0.28f),
+                new Vector3(0f, 0f, 4.6f),
+                new Vector3(3.2f, 8.8f, 3.2f),
+                new Color(0.12f, 0.18f, 0.32f),
                 new Color(0.22f, 0.74f, 0.97f),
                 "Equities & Stock Exchange",
                 stockModal,
                 BuildingDistrictType.StockExchange);
 
-            // 5.2 Metropolitan Commercial Bank (Left Front)
+            // 8.2 Metropolitan Commercial Bank (Left Front)
             CreateStylizedBuilding("Building_Bank", cityParent,
-                new Vector3(-4.8f, 0f, -1.0f),
-                new Vector3(3.4f, 5.2f, 3.4f),
+                new Vector3(-5.0f, 0f, -1.0f),
+                new Vector3(3.6f, 5.2f, 3.6f),
                 new Color(0.14f, 0.18f, 0.25f),
-                new Color(0.96f, 0.62f, 0.04f),
+                new Color(0.96f, 0.65f, 0.10f),
                 "Commercial Bank & Credit",
                 finModal,
                 BuildingDistrictType.Bank);
 
-            // 5.3 Real Estate Skyline Plaza (Right Front)
+            // 8.3 Real Estate Skyline Plaza (Right Front)
             CreateStylizedBuilding("Building_RealEstate", cityParent,
-                new Vector3(4.8f, 0f, -1.0f),
-                new Vector3(3.2f, 7.2f, 3.2f),
-                new Color(0.08f, 0.22f, 0.20f),
-                new Color(0.06f, 0.73f, 0.51f),
+                new Vector3(5.0f, 0f, -1.0f),
+                new Vector3(3.2f, 7.4f, 3.2f),
+                new Color(0.06f, 0.24f, 0.20f),
+                new Color(0.08f, 0.80f, 0.55f),
                 "Skyline Real Estate Agency",
                 realEstateModal,
                 BuildingDistrictType.RealEstate);
 
-            // 5.4 Apex Corporate HQ (Left Rear)
+            // 8.4 Apex Corporate HQ (Left Rear)
             CreateStylizedBuilding("Building_CorporateHQ", cityParent,
-                new Vector3(-5.0f, 0f, 6.0f),
-                new Vector3(3.0f, 6.4f, 3.0f),
-                new Color(0.12f, 0.22f, 0.38f),
-                new Color(0.39f, 0.40f, 0.95f),
+                new Vector3(-5.2f, 0f, 6.2f),
+                new Vector3(3.0f, 6.5f, 3.0f),
+                new Color(0.14f, 0.22f, 0.40f),
+                new Color(0.45f, 0.45f, 0.98f),
                 "Apex Corporate Headquarters",
                 dashModal,
                 BuildingDistrictType.Corporation);
 
-            // 5.5 Residential High-Rise District (Right Rear)
+            // 8.5 Residential High-Rise District (Right Rear)
             CreateStylizedBuilding("Building_Residential", cityParent,
-                new Vector3(5.0f, 0f, 6.0f),
-                new Vector3(3.0f, 5.8f, 3.0f),
-                new Color(0.22f, 0.14f, 0.24f),
-                new Color(0.96f, 0.25f, 0.37f),
+                new Vector3(5.2f, 0f, 6.2f),
+                new Vector3(3.0f, 6.0f, 3.0f),
+                new Color(0.24f, 0.14f, 0.26f),
+                new Color(0.96f, 0.30f, 0.45f),
                 "Metropolitan Residential Leases",
                 housingModal,
                 BuildingDistrictType.Residential);
+
+            // 9. Stylized Player Avatar in Plaza
+            CreateStylizedAvatar(cityParent, new Vector3(0f, 0f, 0.2f));
 
             // 6. City Explore Overlay UI
             var cityOverlay = CreateUIObject("CityExploreOverlay", canvasGo);
@@ -1627,6 +1675,172 @@ namespace RichRich.Editor
             return buildingRoot;
         }
 
+        private static void CreateLowPolyTree(string name, GameObject parent, Vector3 position)
+        {
+            var treeGo = new GameObject(name);
+            treeGo.transform.SetParent(parent.transform, false);
+            treeGo.transform.position = position;
+
+            // Trunk
+            var trunk = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            trunk.name = "Trunk";
+            trunk.transform.SetParent(treeGo.transform, false);
+            trunk.transform.localPosition = new Vector3(0, 0.65f, 0);
+            trunk.transform.localScale = new Vector3(0.32f, 1.3f, 0.32f);
+            trunk.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial(new Color(0.28f, 0.16f, 0.08f));
+            GameObject.DestroyImmediate(trunk.GetComponent<Collider>());
+
+            // Foliage Low
+            var fol1 = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            fol1.name = "FoliageLow";
+            fol1.transform.SetParent(treeGo.transform, false);
+            fol1.transform.localPosition = new Vector3(0, 1.7f, 0);
+            fol1.transform.localScale = new Vector3(1.5f, 1.1f, 1.5f);
+            fol1.transform.localRotation = Quaternion.Euler(0, 25f, 0);
+            fol1.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial(new Color(0.08f, 0.45f, 0.22f));
+            GameObject.DestroyImmediate(fol1.GetComponent<Collider>());
+
+            // Foliage High
+            var fol2 = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            fol2.name = "FoliageHigh";
+            fol2.transform.SetParent(treeGo.transform, false);
+            fol2.transform.localPosition = new Vector3(0, 2.4f, 0);
+            fol2.transform.localScale = new Vector3(1.0f, 0.9f, 1.0f);
+            fol2.transform.localRotation = Quaternion.Euler(0, 50f, 0);
+            fol2.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial(new Color(0.14f, 0.65f, 0.32f));
+            GameObject.DestroyImmediate(fol2.GetComponent<Collider>());
+        }
+
+        private static void CreateLowPolyStreetlight(string name, GameObject parent, Vector3 position)
+        {
+            var lightGo = new GameObject(name);
+            lightGo.transform.SetParent(parent.transform, false);
+            lightGo.transform.position = position;
+
+            // Post
+            var post = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            post.name = "Post";
+            post.transform.SetParent(lightGo.transform, false);
+            post.transform.localPosition = new Vector3(0, 1.6f, 0);
+            post.transform.localScale = new Vector3(0.12f, 3.2f, 0.12f);
+            post.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial(new Color(0.15f, 0.18f, 0.25f));
+            GameObject.DestroyImmediate(post.GetComponent<Collider>());
+
+            // Arm
+            var arm = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            arm.name = "Arm";
+            arm.transform.SetParent(lightGo.transform, false);
+            arm.transform.localPosition = new Vector3(0.25f, 3.1f, 0);
+            arm.transform.localScale = new Vector3(0.55f, 0.08f, 0.12f);
+            arm.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial(new Color(0.15f, 0.18f, 0.25f));
+            GameObject.DestroyImmediate(arm.GetComponent<Collider>());
+
+            // Lamp Glow Head
+            var head = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            head.name = "Head";
+            head.transform.SetParent(lightGo.transform, false);
+            head.transform.localPosition = new Vector3(0.48f, 3.0f, 0);
+            head.transform.localScale = new Vector3(0.24f, 0.14f, 0.20f);
+            head.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial(new Color(0.98f, 0.82f, 0.25f));
+            GameObject.DestroyImmediate(head.GetComponent<Collider>());
+        }
+
+        private static void CreateBackgroundSkyscraper(string name, GameObject parent, Vector3 position, Vector3 scale, Color color)
+        {
+            var skyGo = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            skyGo.name = name;
+            skyGo.transform.SetParent(parent.transform, false);
+            skyGo.transform.position = new Vector3(position.x, scale.y * 0.5f, position.z);
+            skyGo.transform.localScale = scale;
+            skyGo.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial(color);
+            GameObject.DestroyImmediate(skyGo.GetComponent<Collider>());
+        }
+
+        private static GameObject CreateStylizedAvatar(GameObject parent, Vector3 spawnPosition)
+        {
+            var avatarGo = new GameObject("PlayerAvatar");
+            avatarGo.transform.SetParent(parent.transform, false);
+            avatarGo.transform.position = spawnPosition;
+
+            var avatarCtrl = avatarGo.AddComponent<PlayerAvatarController>();
+
+            var bodyRoot = new GameObject("BodyRoot");
+            bodyRoot.transform.SetParent(avatarGo.transform, false);
+            bodyRoot.transform.localPosition = new Vector3(0, 0.65f, 0);
+
+            // Torso (Cyan/Teal blazer)
+            var torso = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            torso.name = "Torso";
+            torso.transform.SetParent(bodyRoot.transform, false);
+            torso.transform.localPosition = Vector3.zero;
+            torso.transform.localScale = new Vector3(0.50f, 0.60f, 0.32f);
+            torso.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial(new Color(0.08f, 0.52f, 0.78f));
+            GameObject.DestroyImmediate(torso.GetComponent<Collider>());
+
+            // Head
+            var head = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            head.name = "Head";
+            head.transform.SetParent(bodyRoot.transform, false);
+            head.transform.localPosition = new Vector3(0, 0.52f, 0);
+            head.transform.localScale = new Vector3(0.36f, 0.36f, 0.36f);
+            head.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial(new Color(0.98f, 0.82f, 0.65f));
+            GameObject.DestroyImmediate(head.GetComponent<Collider>());
+
+            // Hair
+            var hair = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            hair.name = "Hair";
+            hair.transform.SetParent(head.transform, false);
+            hair.transform.localPosition = new Vector3(0, 0.22f, -0.04f);
+            hair.transform.localScale = new Vector3(1.05f, 0.35f, 1.05f);
+            hair.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial(new Color(0.12f, 0.15f, 0.22f));
+            GameObject.DestroyImmediate(hair.GetComponent<Collider>());
+
+            // Left Arm
+            var leftArm = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            leftArm.name = "LeftArm";
+            leftArm.transform.SetParent(bodyRoot.transform, false);
+            leftArm.transform.localPosition = new Vector3(-0.36f, 0, 0);
+            leftArm.transform.localScale = new Vector3(0.16f, 0.52f, 0.16f);
+            leftArm.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial(new Color(0.08f, 0.52f, 0.78f));
+            GameObject.DestroyImmediate(leftArm.GetComponent<Collider>());
+
+            // Right Arm
+            var rightArm = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            rightArm.name = "RightArm";
+            rightArm.transform.SetParent(bodyRoot.transform, false);
+            rightArm.transform.localPosition = new Vector3(0.36f, 0, 0);
+            rightArm.transform.localScale = new Vector3(0.16f, 0.52f, 0.16f);
+            rightArm.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial(new Color(0.08f, 0.52f, 0.78f));
+            GameObject.DestroyImmediate(rightArm.GetComponent<Collider>());
+
+            // Left Leg
+            var leftLeg = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            leftLeg.name = "LeftLeg";
+            leftLeg.transform.SetParent(avatarGo.transform, false);
+            leftLeg.transform.localPosition = new Vector3(-0.16f, 0.26f, 0);
+            leftLeg.transform.localScale = new Vector3(0.18f, 0.52f, 0.18f);
+            leftLeg.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial(new Color(0.12f, 0.15f, 0.22f));
+            GameObject.DestroyImmediate(leftLeg.GetComponent<Collider>());
+
+            // Right Leg
+            var rightLeg = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            rightLeg.name = "RightLeg";
+            rightLeg.transform.SetParent(avatarGo.transform, false);
+            rightLeg.transform.localPosition = new Vector3(0.16f, 0.26f, 0);
+            rightLeg.transform.localScale = new Vector3(0.18f, 0.52f, 0.18f);
+            rightLeg.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial(new Color(0.12f, 0.15f, 0.22f));
+            GameObject.DestroyImmediate(rightLeg.GetComponent<Collider>());
+
+            // Wire limb references into PlayerAvatarController
+            SetPrivateField(avatarCtrl, "_leftLeg", leftLeg.transform);
+            SetPrivateField(avatarCtrl, "_rightLeg", rightLeg.transform);
+            SetPrivateField(avatarCtrl, "_leftArm", leftArm.transform);
+            SetPrivateField(avatarCtrl, "_rightArm", rightArm.transform);
+            SetPrivateField(avatarCtrl, "_bodyRoot", bodyRoot.transform);
+
+            return avatarGo;
+        }
+
         private static Material CreateStylizedMaterial(Color color)
         {
             var shader = Shader.Find("Mobile/Diffuse")
@@ -1650,13 +1864,22 @@ namespace RichRich.Editor
             return go;
         }
 
-        private static GameObject CreatePanel(string name, GameObject parent, Color color)
+        private static GameObject CreatePanel(string name, GameObject parent, Color color, string spritePath = null)
         {
             var panelGo = DefaultControls.CreatePanel(_defaultResources);
             panelGo.name = name;
             panelGo.transform.SetParent(parent.transform, false);
             var img = panelGo.GetComponent<Image>();
             img.color = color;
+            if (!string.IsNullOrEmpty(spritePath))
+            {
+                var sp = AssetDatabase.LoadAssetAtPath<Sprite>(spritePath);
+                if (sp != null)
+                {
+                    img.sprite = sp;
+                    img.type = Image.Type.Sliced;
+                }
+            }
             return panelGo;
         }
 
@@ -1675,13 +1898,22 @@ namespace RichRich.Editor
             return t;
         }
 
-        private static Button CreateButton(string name, GameObject parent, string label, Color bgColor, Color textColor)
+        private static Button CreateButton(string name, GameObject parent, string label, Color bgColor, Color textColor, string spritePath = null)
         {
             var btnGo = DefaultControls.CreateButton(_defaultResources);
             btnGo.name = name;
             btnGo.transform.SetParent(parent.transform, false);
             var img = btnGo.GetComponent<Image>();
             img.color = bgColor;
+            if (!string.IsNullOrEmpty(spritePath))
+            {
+                var sp = AssetDatabase.LoadAssetAtPath<Sprite>(spritePath);
+                if (sp != null)
+                {
+                    img.sprite = sp;
+                    img.type = Image.Type.Sliced;
+                }
+            }
             var t = btnGo.GetComponentInChildren<Text>();
             if (t != null)
             {
@@ -1695,9 +1927,126 @@ namespace RichRich.Editor
 
         private static Button CreateNavButton(string name, GameObject parent, string label, float xMin, float yMin, float xMax, float yMax, float offXMin, float offYMin, float offXMax, float offYMax)
         {
-            var btn = CreateButton(name, parent, label, new Color(0.14f, 0.20f, 0.32f), Color.white);
+            var btn = CreateButton(name, parent, label, new Color(0.14f, 0.20f, 0.32f), Color.white, "Assets/Sprites/UI/btn_dark_9slice.png");
             SetRect(btn.gameObject, xMin, yMin, xMax, yMax, offXMin, offYMin, offXMax, offYMax);
             return btn;
+        }
+
+        private static Button CreateDockCategoryButton(
+            string name,
+            GameObject parent,
+            string label,
+            string iconPath,
+            Color accentColor,
+            float xMin,
+            float xMax)
+        {
+            var btnGo = CreateUIObject(name, parent);
+            SetRect(btnGo, xMin, 0, xMax, 1, 6, 10, -6, -10);
+
+            var img = btnGo.AddComponent<Image>();
+            img.color = new Color(0.10f, 0.15f, 0.24f, 0.85f);
+            var darkSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/btn_dark_9slice.png");
+            if (darkSprite != null)
+            {
+                img.sprite = darkSprite;
+                img.type = Image.Type.Sliced;
+            }
+
+            var btn = btnGo.AddComponent<Button>();
+
+            // Icon Image (Top 60%)
+            var iconGo = CreateUIObject("Icon", btnGo);
+            SetRect(iconGo, 0.5f, 0.65f, 0.5f, 0.65f, -28, -28, 28, 28);
+            var iconImg = iconGo.AddComponent<Image>();
+            if (!string.IsNullOrEmpty(iconPath))
+            {
+                var sp = AssetDatabase.LoadAssetAtPath<Sprite>(iconPath);
+                if (sp != null) iconImg.sprite = sp;
+            }
+            iconImg.color = accentColor;
+
+            // Label Text (Bottom 35%)
+            var labelText = CreateText("Label", btnGo, label, 20, accentColor, FontStyle.Bold, TextAnchor.MiddleCenter);
+            SetRect(labelText.gameObject, 0, 0, 1, 0.38f, 0, 0, 0, 0);
+
+            return btn;
+        }
+
+        private static Button CreateCategoryCardButton(
+            string name,
+            GameObject parent,
+            string title,
+            string description,
+            Color accentColor,
+            float yTop,
+            float height = 105f)
+        {
+            var btnGo = CreateUIObject(name, parent);
+            SetRect(btnGo, 0.04f, 1f, 0.96f, 1f, 0, -(yTop + height), 0, -yTop);
+
+            var img = btnGo.AddComponent<Image>();
+            img.color = new Color(0.10f, 0.15f, 0.25f, 0.92f);
+            var darkSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/btn_dark_9slice.png");
+            if (darkSprite != null)
+            {
+                img.sprite = darkSprite;
+                img.type = Image.Type.Sliced;
+            }
+
+            var btn = btnGo.AddComponent<Button>();
+
+            // Title
+            var titleText = CreateText("Title", btnGo, title, 26, accentColor, FontStyle.Bold, TextAnchor.MiddleLeft);
+            SetRect(titleText.gameObject, 0, 0.46f, 0.95f, 0.95f, 22, 0, 0, 0);
+
+            // Description
+            var descText = CreateText("Desc", btnGo, description, 20, new Color(0.72f, 0.78f, 0.88f), FontStyle.Normal, TextAnchor.MiddleLeft);
+            SetRect(descText.gameObject, 0, 0.05f, 0.95f, 0.48f, 22, 0, 0, 0);
+
+            return btn;
+        }
+
+        private static void BuildCareerPortalUI(GameObject root, out Button jobBtn, out Button eduBtn, out Button houseBtn, out Button lifeBtn)
+        {
+            var content = root.transform.Find("Dialog/Content").gameObject;
+
+            var desc = CreateText("Desc", content, "Personal life progression, career pathways, higher education certifications, and residential leases.", 22, new Color(0.70f, 0.78f, 0.90f), FontStyle.Normal, TextAnchor.UpperLeft);
+            SetRect(desc.gameObject, 0.04f, 1f, 0.96f, 1f, 0, -50, 0, -10);
+
+            jobBtn = CreateCategoryCardButton("JobCardBtn", content, "💼 Career Board & Vacancies", "Apply for corporate jobs, attend shifts, climb corporate ladder", new Color(0.35f, 0.85f, 0.55f), 70);
+            eduBtn = CreateCategoryCardButton("EduCardBtn", content, "🎓 Higher Education & Degrees", "Enroll in university degree programs to boost salary tiers", new Color(0.35f, 0.75f, 0.98f), 190);
+            houseBtn = CreateCategoryCardButton("HouseCardBtn", content, "🏠 Housing & Residential Leases", "Rent apartments and luxury penthouses for energy & comfort", new Color(0.96f, 0.75f, 0.25f), 310);
+            lifeBtn = CreateCategoryCardButton("LifeCardBtn", content, "⚡ Lifestyle, Wellness & Rest", "Manage daily lifestyle tier, sleep routine, and fatigue", new Color(0.95f, 0.45f, 0.65f), 430);
+        }
+
+        private static void BuildEnterprisePortalUI(GameObject root, out Button dashBtn, out Button mktBtn, out Button autoBtn, out Button storeBtn, out Button agencyBtn, out Button staffBtn, out Button finBtn)
+        {
+            var content = root.transform.Find("Dialog/Content").gameObject;
+
+            var desc = CreateText("Desc", content, "Commercial enterprise management, business acquisitions, customer service bays, retail and commercial debt.", 22, new Color(0.70f, 0.78f, 0.90f), FontStyle.Normal, TextAnchor.UpperLeft);
+            SetRect(desc.gameObject, 0.04f, 1f, 0.96f, 1f, 0, -45, 0, -10);
+
+            dashBtn = CreateCategoryCardButton("DashCardBtn", content, "📊 Enterprise Dashboard", "Executive operational overview of all business units", new Color(0.96f, 0.75f, 0.25f), 60, 90);
+            mktBtn = CreateCategoryCardButton("MktCardBtn", content, "🏪 Acquisitions Marketplace", "Purchase new commercial businesses and expand reach", new Color(0.35f, 0.85f, 0.55f), 160, 90);
+            autoBtn = CreateCategoryCardButton("AutoCardBtn", content, "🔧 Auto Repair Workshop Bays", "Operate vehicle repair bays, parts inventory & customer repairs", new Color(0.35f, 0.75f, 0.98f), 260, 90);
+            storeBtn = CreateCategoryCardButton("StoreCardBtn", content, "🛒 Convenience Retail Store", "Set product margins, stock shelves, daily customer footfall", new Color(0.95f, 0.55f, 0.35f), 360, 90);
+            agencyBtn = CreateCategoryCardButton("AgencyCardBtn", content, "💻 Digital Marketing Agency", "Accept client design & advertising retainer campaigns", new Color(0.75f, 0.45f, 0.95f), 460, 90);
+            staffBtn = CreateCategoryCardButton("StaffCardBtn", content, "👥 Recruitment & Staffing HR", "Hire skilled technicians, retail staff, and digital managers", new Color(0.35f, 0.85f, 0.75f), 560, 90);
+            finBtn = CreateCategoryCardButton("FinCardBtn", content, "💳 Commercial Credit & Debt", "Manage enterprise loans, credit lines, and cash reserves", new Color(0.95f, 0.40f, 0.40f), 660, 90);
+        }
+
+        private static void BuildWealthPortalUI(GameObject root, out Button stockBtn, out Button realEstateBtn, out Button goalsBtn, out Button setBtn)
+        {
+            var content = root.transform.Find("Dialog/Content").gameObject;
+
+            var desc = CreateText("Desc", content, "Financial markets, real estate portfolios, independence milestones, and game system settings.", 22, new Color(0.70f, 0.78f, 0.90f), FontStyle.Normal, TextAnchor.UpperLeft);
+            SetRect(desc.gameObject, 0.04f, 1f, 0.96f, 1f, 0, -50, 0, -10);
+
+            stockBtn = CreateCategoryCardButton("StockCardBtn", content, "📈 Equities & Stock Exchange", "Invest in corporate equities and dividend portfolios", new Color(0.35f, 0.85f, 0.55f), 70);
+            realEstateBtn = CreateCategoryCardButton("RealEstateCardBtn", content, "🏢 Real Estate & Properties", "Acquire residential rentals and commercial properties", new Color(0.35f, 0.75f, 0.98f), 190);
+            goalsBtn = CreateCategoryCardButton("GoalsCardBtn", content, "🎯 Life Progression & FIRE", "Track net worth milestones, achievements & retirement", new Color(0.96f, 0.75f, 0.25f), 310);
+            setBtn = CreateCategoryCardButton("SetCardBtn", content, "⚙️ Settings & Persistence", "Simulation settings, audio toggles, and safe local save", new Color(0.75f, 0.80f, 0.90f), 430);
         }
 
         private static GameObject CreateModalSheet(string name, GameObject parent, string title, out Button closeButton)
@@ -1712,18 +2061,18 @@ namespace RichRich.Editor
             var backdropBtn = backdrop.AddComponent<Button>();
             backdropBtn.transition = Selectable.Transition.None;
 
-            // Dialog Window
-            var dialog = CreatePanel("Dialog", modalRoot, new Color(0.09f, 0.13f, 0.22f, 1.0f));
+            // Dialog Window (FinTech Card 9-slice)
+            var dialog = CreatePanel("Dialog", modalRoot, new Color(0.09f, 0.13f, 0.22f, 0.98f), "Assets/Sprites/UI/card_bg_9slice.png");
             SetRect(dialog, 0.03f, 0.05f, 0.97f, 0.95f, 0, 0, 0, 0);
 
-            // Dialog Header
-            var header = CreatePanel("Header", dialog, new Color(0.12f, 0.18f, 0.30f, 1.0f));
+            // Dialog Header (Dock 9-slice)
+            var header = CreatePanel("Header", dialog, new Color(0.12f, 0.18f, 0.30f, 1.0f), "Assets/Sprites/UI/dock_bg_9slice.png");
             SetRect(header, 0, 1, 1, 1, 0, -90, 0, 0);
 
             var titleText = CreateText("Title", header, title, 30, new Color(0.95f, 0.8f, 0.2f), FontStyle.Bold, TextAnchor.MiddleLeft);
             SetRect(titleText.gameObject, 0, 0, 0.68f, 1, 24, 0, 0, 0);
 
-            closeButton = CreateButton("BackBtn", header, "← Back", new Color(0.75f, 0.22f, 0.22f), Color.white);
+            closeButton = CreateButton("BackBtn", header, "← Back", new Color(0.75f, 0.22f, 0.22f), Color.white, "Assets/Sprites/UI/btn_danger_9slice.png");
             SetRect(closeButton.gameObject, 0.70f, 0.15f, 0.98f, 0.85f, 0, 0, 0, 0);
 
             // Attach ModalSheetView component to handle close and backdrop clicks
@@ -1750,7 +2099,7 @@ namespace RichRich.Editor
             backdropBtn.transition = Selectable.Transition.None;
 
             // Centered Dialog Box
-            var dialog = CreatePanel("Dialog", exitRoot, new Color(0.09f, 0.13f, 0.22f, 1.0f));
+            var dialog = CreatePanel("Dialog", exitRoot, new Color(0.09f, 0.13f, 0.22f, 1.0f), "Assets/Sprites/UI/card_bg_9slice.png");
             SetRect(dialog, 0.08f, 0.36f, 0.92f, 0.64f, 0, 0, 0, 0);
 
             // Title
@@ -1762,11 +2111,11 @@ namespace RichRich.Editor
             SetRect(msg.gameObject, 0.05f, 0.38f, 0.95f, 0.70f, 0, 0, 0, 0);
 
             // Cancel Button
-            cancelBtn = CreateButton("CancelBtn", dialog, "Cancel", new Color(0.14f, 0.35f, 0.25f), Color.white);
+            cancelBtn = CreateButton("CancelBtn", dialog, "Cancel", new Color(0.14f, 0.35f, 0.25f), Color.white, "Assets/Sprites/UI/btn_dark_9slice.png");
             SetRect(cancelBtn.gameObject, 0.08f, 0.10f, 0.46f, 0.32f, 0, 0, 0, 0);
 
             // Exit Game Button
-            confirmBtn = CreateButton("ExitBtn", dialog, "Exit Game", new Color(0.75f, 0.22f, 0.22f), Color.white);
+            confirmBtn = CreateButton("ExitBtn", dialog, "Exit Game", new Color(0.75f, 0.22f, 0.22f), Color.white, "Assets/Sprites/UI/btn_danger_9slice.png");
             SetRect(confirmBtn.gameObject, 0.54f, 0.10f, 0.92f, 0.32f, 0, 0, 0, 0);
 
             // Clicking backdrop dismisses exit dialog

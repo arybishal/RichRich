@@ -276,6 +276,28 @@ namespace RichRich.Presentation.Views
                     _settingsView.Bind(settingsController, _saveService);
                 }
             }, "SettingsModal");
+
+            // Floating Currency Feedback Event Binding
+            SafeBind(() =>
+            {
+                if (LifeCoordinator.FinancialService != null)
+                {
+                    LifeCoordinator.FinancialService.OnTransactionExecuted += tx =>
+                    {
+                        if (FloatingCurrencyFeedback.Instance != null)
+                        {
+                            if (tx.Type == TransactionType.Income || tx.Type == TransactionType.LiabilityDraw || tx.Type == TransactionType.AssetLiquidation)
+                            {
+                                FloatingCurrencyFeedback.Instance.ShowIncome(tx.Amount, tx.Description);
+                            }
+                            else
+                            {
+                                FloatingCurrencyFeedback.Instance.ShowExpense(tx.Amount, tx.Description);
+                            }
+                        }
+                    };
+                }
+            }, "CurrencyFeedback");
         }
 
         private void SafeBind(Action action, string subsystemName)

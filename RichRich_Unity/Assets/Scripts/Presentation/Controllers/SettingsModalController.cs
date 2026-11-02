@@ -12,7 +12,7 @@ namespace RichRich.Presentation.Controllers
     {
         public bool SoundEnabled { get; private set; }
         public bool HapticsEnabled { get; private set; }
-        public string VersionText => "RichRich v0.2.0";
+        public string VersionText => "RichRich v0.3.0";
         public string PackageIdText => "com.bishal.richrich";
 
         public event Action OnSettingsChanged;

@@ -54,16 +54,29 @@ namespace RichRich.Presentation.Views
             }
             _bounceRoutine = StartCoroutine(BounceAnimation());
 
-            if (_targetModalRoot != null && ModalManager.Instance != null)
+            Action openAction = () =>
             {
-                var cityController = FindObjectOfType<CityInteractionController>();
-                if (cityController != null && cityController.IsInCityExploreMode)
+                if (_targetModalRoot != null && ModalManager.Instance != null)
                 {
-                    cityController.SetCityExploreMode(false);
-                }
+                    var cityController = FindObjectOfType<CityInteractionController>();
+                    if (cityController != null && cityController.IsInCityExploreMode)
+                    {
+                        cityController.SetCityExploreMode(false);
+                    }
 
-                Debug.Log($"[CityBuilding] Point of interest '{_buildingName}' selected. Opening {_targetModalRoot.name}...");
-                ModalManager.Instance.OpenRoot(_targetModalRoot);
+                    Debug.Log($"[CityBuilding] Point of interest '{_buildingName}' selected. Opening {_targetModalRoot.name}...");
+                    ModalManager.Instance.OpenRoot(_targetModalRoot);
+                }
+            };
+
+            var avatar = FindObjectOfType<PlayerAvatarController>();
+            if (avatar != null)
+            {
+                avatar.WalkToBuilding(this, openAction);
+            }
+            else
+            {
+                openAction();
             }
         }
 

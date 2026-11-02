@@ -254,5 +254,70 @@ namespace RichRich.Tests
             Assert.Throws<ArgumentNullException>(() => _controller.PushRoot(null));
             Assert.Throws<ArgumentNullException>(() => _controller.PushChild(null));
         }
+
+        [Test]
+        public void CategoryPortal_Career_PushesAndPopsChildModalsCleanly()
+        {
+            // Open Career Portal as root
+            _controller.PushRoot("CareerPortalModal");
+            Assert.That(_controller.ActiveCount, Is.EqualTo(1));
+            Assert.That(_controller.CurrentTop, Is.EqualTo("CareerPortalModal"));
+
+            // Tap Career Board -> Pushes child modal
+            _controller.PushChild("JobBoardModal");
+            Assert.That(_controller.ActiveCount, Is.EqualTo(2));
+            Assert.That(_controller.CurrentTop, Is.EqualTo("JobBoardModal"));
+
+            // Press Back -> Returns to Career Portal
+            var res1 = _controller.HandleBackPress();
+            Assert.That(res1, Is.EqualTo(BackPressResult.PoppedModal));
+            Assert.That(_controller.ActiveCount, Is.EqualTo(1));
+            Assert.That(_controller.CurrentTop, Is.EqualTo("CareerPortalModal"));
+
+            // Press Back -> Returns to Metropolis HUD
+            var res2 = _controller.HandleBackPress();
+            Assert.That(res2, Is.EqualTo(BackPressResult.PoppedModal));
+            Assert.That(_controller.ActiveCount, Is.EqualTo(0));
+            Assert.That(_controller.HasActiveModals, Is.False);
+        }
+
+        [Test]
+        public void CategoryPortal_Enterprise_NestedSubsystemNavigation()
+        {
+            // Open Enterprise Portal Hub
+            _controller.PushRoot("EnterprisePortalModal");
+            // Navigate to Dashboard
+            _controller.PushChild("DashboardModal");
+            // Navigate to Staff Recruitment
+            _controller.PushChild("StaffModal");
+
+            Assert.That(_controller.ActiveCount, Is.EqualTo(3));
+            Assert.That(_controller.CurrentTop, Is.EqualTo("StaffModal"));
+
+            // Back from Staff -> Dashboard
+            _controller.HandleBackPress();
+            Assert.That(_controller.CurrentTop, Is.EqualTo("DashboardModal"));
+
+            // Back from Dashboard -> Enterprise Portal Hub
+            _controller.HandleBackPress();
+            Assert.That(_controller.CurrentTop, Is.EqualTo("EnterprisePortalModal"));
+            Assert.That(_controller.ActiveCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void CategoryDock_SwitchingRoots_ClearsPreviousCategoryStack()
+        {
+            // In Career Portal, viewing Education modal
+            _controller.PushRoot("CareerPortalModal");
+            _controller.PushChild("EducationModal");
+            Assert.That(_controller.ActiveCount, Is.EqualTo(2));
+
+            // User taps Wealth dock button
+            _controller.PushRoot("WealthPortalModal");
+            Assert.That(_controller.ActiveCount, Is.EqualTo(1));
+            Assert.That(_controller.CurrentTop, Is.EqualTo("WealthPortalModal"));
+            Assert.That(_deactivated, Does.Contain("EducationModal"));
+            Assert.That(_deactivated, Does.Contain("CareerPortalModal"));
+        }
     }
 }
