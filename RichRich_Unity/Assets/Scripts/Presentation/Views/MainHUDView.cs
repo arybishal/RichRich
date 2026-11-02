@@ -105,65 +105,78 @@ namespace RichRich.Presentation.Views
 
             if (_jobBoardOpenButton != null && _jobBoardModalRoot != null)
             {
-                _jobBoardOpenButton.onClick.AddListener(() => _jobBoardModalRoot.SetActive(true));
+                _jobBoardOpenButton.onClick.AddListener(() => OpenRootModal(_jobBoardModalRoot));
             }
 
             if (_educationOpenButton != null && _educationModalRoot != null)
             {
-                _educationOpenButton.onClick.AddListener(() => _educationModalRoot.SetActive(true));
+                _educationOpenButton.onClick.AddListener(() => OpenRootModal(_educationModalRoot));
             }
 
             if (_housingOpenButton != null && _housingModalRoot != null)
             {
-                _housingOpenButton.onClick.AddListener(() => _housingModalRoot.SetActive(true));
+                _housingOpenButton.onClick.AddListener(() => OpenRootModal(_housingModalRoot));
             }
 
             if (_lifestyleOpenButton != null && _lifestyleModalRoot != null)
             {
-                _lifestyleOpenButton.onClick.AddListener(() => _lifestyleModalRoot.SetActive(true));
+                _lifestyleOpenButton.onClick.AddListener(() => OpenRootModal(_lifestyleModalRoot));
             }
 
             if (_businessMarketplaceOpenButton != null && _businessMarketplaceModalRoot != null)
             {
-                _businessMarketplaceOpenButton.onClick.AddListener(() => _businessMarketplaceModalRoot.SetActive(true));
+                _businessMarketplaceOpenButton.onClick.AddListener(() => OpenRootModal(_businessMarketplaceModalRoot));
             }
 
             if (_businessDashboardOpenButton != null && _businessDashboardModalRoot != null)
             {
-                _businessDashboardOpenButton.onClick.AddListener(() => _businessDashboardModalRoot.SetActive(true));
+                _businessDashboardOpenButton.onClick.AddListener(() => OpenRootModal(_businessDashboardModalRoot));
             }
 
             if (_autoRepairOpenButton != null && _autoRepairModalRoot != null)
             {
-                _autoRepairOpenButton.onClick.AddListener(() => _autoRepairModalRoot.SetActive(true));
+                _autoRepairOpenButton.onClick.AddListener(() => OpenRootModal(_autoRepairModalRoot));
             }
 
             if (_convenienceStoreOpenButton != null && _convenienceStoreModalRoot != null)
             {
-                _convenienceStoreOpenButton.onClick.AddListener(() => _convenienceStoreModalRoot.SetActive(true));
+                _convenienceStoreOpenButton.onClick.AddListener(() => OpenRootModal(_convenienceStoreModalRoot));
             }
 
             if (_digitalAgencyOpenButton != null && _digitalAgencyModalRoot != null)
             {
-                _digitalAgencyOpenButton.onClick.AddListener(() => _digitalAgencyModalRoot.SetActive(true));
+                _digitalAgencyOpenButton.onClick.AddListener(() => OpenRootModal(_digitalAgencyModalRoot));
             }
 
             if (_businessEmployeeOpenButton != null && _businessEmployeeModalRoot != null)
             {
-                _businessEmployeeOpenButton.onClick.AddListener(() => _businessEmployeeModalRoot.SetActive(true));
+                _businessEmployeeOpenButton.onClick.AddListener(() => OpenRootModal(_businessEmployeeModalRoot));
             }
 
             if (_businessFinanceOpenButton != null && _businessFinanceModalRoot != null)
             {
-                _businessFinanceOpenButton.onClick.AddListener(() => _businessFinanceModalRoot.SetActive(true));
+                _businessFinanceOpenButton.onClick.AddListener(() => OpenRootModal(_businessFinanceModalRoot));
             }
 
             if (_settingsOpenButton != null && _settingsModalRoot != null)
             {
-                _settingsOpenButton.onClick.AddListener(() => _settingsModalRoot.SetActive(true));
+                _settingsOpenButton.onClick.AddListener(() => OpenRootModal(_settingsModalRoot));
             }
 
             RefreshUI();
+        }
+
+        private void OpenRootModal(GameObject modalRoot)
+        {
+            if (modalRoot == null) return;
+            if (ModalManager.Instance != null)
+            {
+                ModalManager.Instance.OpenRoot(modalRoot);
+            }
+            else
+            {
+                modalRoot.SetActive(true);
+            }
         }
 
         private void OnDestroy()

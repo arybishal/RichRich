@@ -208,9 +208,10 @@ namespace RichRich.Editor
             SetPrivateField(hudView, "_energyStatusText", energyText);
             SetPrivateField(hudView, "_fatigueStatusText", fatigueText);
 
-            // 7. Modals Root Container
+            // 7. Modals Root Container & ModalManager
             var modalsRoot = CreateUIObject("Modals", canvasGo);
             StretchFull(modalsRoot);
+            modalsRoot.AddComponent<ModalManager>();
 
             // --- 7.1 Job Board Modal ---
             var jobModal = CreateModalSheet("JobBoardModal", modalsRoot, "Career Board & Vacancies", out var jobCloseBtn);
@@ -271,6 +272,14 @@ namespace RichRich.Editor
             var setModal = CreateModalSheet("SettingsModal", modalsRoot, "Settings & Persistence", out var setCloseBtn);
             var setView = setModal.AddComponent<SettingsModalView>();
             BuildSettingsUI(setModal, setView, setCloseBtn);
+
+            // --- 7.13 Exit Confirmation Dialog ---
+            var exitDialog = CreateExitConfirmDialog(modalsRoot, out var exitCancelBtn, out var exitConfirmBtn);
+            var modalManager = modalsRoot.GetComponent<ModalManager>();
+            modalManager.BindExitDialog(exitDialog, exitCancelBtn, exitConfirmBtn);
+
+            // Wire nested enterprise modals into BusinessDashboardView
+            dashView.BindNestedModals(staffModal, finModal);
 
             // Wire HUD Nav buttons to Modal roots
             SetPrivateField(hudView, "_jobBoardOpenButton", jobBtn);
@@ -664,24 +673,30 @@ namespace RichRich.Editor
             SetRect(condText.gameObject, 0.66f, 0.55f, 1, 0.63f, 0, 0, -20, 0);
 
             var assetVal = CreateText("AssetVal", content, "Asset Valuation: $0.00", 24, Color.white, FontStyle.Normal, TextAnchor.MiddleLeft);
-            SetRect(assetVal.gameObject, 0, 0.45f, 0.5f, 0.53f, 20, 0, 0, 0);
+            SetRect(assetVal.gameObject, 0, 0.46f, 0.5f, 0.54f, 20, 0, 0, 0);
             var upgCost = CreateText("UpgCost", content, "Upgrade Cost: $0.00", 24, new Color(0.95f, 0.8f, 0.2f), FontStyle.Normal, TextAnchor.MiddleRight);
-            SetRect(upgCost.gameObject, 0.5f, 0.45f, 1, 0.53f, 0, 0, -20, 0);
+            SetRect(upgCost.gameObject, 0.5f, 0.46f, 1, 0.54f, 0, 0, -20, 0);
             var liqVal = CreateText("LiqVal", content, "Liquidation Payout: $0.00", 24, new Color(0.7f, 0.75f, 0.85f), FontStyle.Normal, TextAnchor.MiddleLeft);
-            SetRect(liqVal.gameObject, 0, 0.37f, 1, 0.45f, 20, 0, -20, 0);
+            SetRect(liqVal.gameObject, 0, 0.38f, 1, 0.46f, 20, 0, -20, 0);
+
+            // Nested Subsystem Navigation
+            var staffBtn = CreateButton("NavStaffBtn", content, "Manage Staff →", new Color(0.18f, 0.32f, 0.52f), Color.white);
+            SetRect(staffBtn.gameObject, 0.1f, 0.28f, 0.48f, 0.37f, 0, 0, 0, 0);
+            var finBtn = CreateButton("NavFinBtn", content, "Credit Facilities →", new Color(0.18f, 0.32f, 0.52f), Color.white);
+            SetRect(finBtn.gameObject, 0.52f, 0.28f, 0.9f, 0.37f, 0, 0, 0, 0);
 
             var toggleBtn = CreateButton("ToggleOpenBtn", content, "Open for Business", new Color(0.18f, 0.45f, 0.75f), Color.white);
             var toggleText = toggleBtn.GetComponentInChildren<Text>();
-            SetRect(toggleBtn.gameObject, 0.1f, 0.22f, 0.9f, 0.32f, 0, 0, 0, 0);
+            SetRect(toggleBtn.gameObject, 0.1f, 0.18f, 0.9f, 0.26f, 0, 0, 0, 0);
 
             var upgBtn = CreateButton("UpgBtn", content, "Upgrade Facility", new Color(0.12f, 0.65f, 0.35f), Color.white);
-            SetRect(upgBtn.gameObject, 0.1f, 0.10f, 0.48f, 0.20f, 0, 0, 0, 0);
+            SetRect(upgBtn.gameObject, 0.1f, 0.08f, 0.48f, 0.16f, 0, 0, 0, 0);
 
             var sellBtn = CreateButton("SellBtn", content, "Liquidate Business", new Color(0.75f, 0.25f, 0.25f), Color.white);
-            SetRect(sellBtn.gameObject, 0.52f, 0.10f, 0.9f, 0.20f, 0, 0, 0, 0);
+            SetRect(sellBtn.gameObject, 0.52f, 0.08f, 0.9f, 0.16f, 0, 0, 0, 0);
 
             var feedback = CreateText("Feedback", content, "", 22, new Color(0.95f, 0.85f, 0.4f), FontStyle.Bold, TextAnchor.MiddleCenter);
-            SetRect(feedback.gameObject, 0, 0.01f, 1, 0.08f, 20, 0, -20, 0);
+            SetRect(feedback.gameObject, 0, 0.01f, 1, 0.07f, 20, 0, -20, 0);
 
             SetPrivateField(view, "_totalPortfolioValuationText", valText);
             SetPrivateField(view, "_totalMonthlyNetProfitText", profText);
@@ -694,6 +709,8 @@ namespace RichRich.Editor
             SetPrivateField(view, "_businessValuationText", assetVal);
             SetPrivateField(view, "_upgradeCostText", upgCost);
             SetPrivateField(view, "_liquidationValueText", liqVal);
+            SetPrivateField(view, "_navStaffButton", staffBtn);
+            SetPrivateField(view, "_navFinanceButton", finBtn);
             SetPrivateField(view, "_toggleOpenButton", toggleBtn);
             SetPrivateField(view, "_toggleOpenButtonText", toggleText);
             SetPrivateField(view, "_upgradeButton", upgBtn);
@@ -975,7 +992,7 @@ namespace RichRich.Editor
             hapticsToggle.GetComponentInChildren<Text>().color = Color.white;
             SetRect(hapticsToggleGo, 0.1f, 0.62f, 0.9f, 0.72f, 0, 0, 0, 0);
 
-            var ver = CreateText("Version", content, "Version: 0.1.1", 24, new Color(0.7f, 0.75f, 0.85f), FontStyle.Normal, TextAnchor.MiddleLeft);
+            var ver = CreateText("Version", content, "Version: 0.1.2", 24, new Color(0.7f, 0.75f, 0.85f), FontStyle.Normal, TextAnchor.MiddleLeft);
             SetRect(ver.gameObject, 0, 0.48f, 1, 0.56f, 20, 0, -20, 0);
             var pkg = CreateText("Pkg", content, "Package: com.bishal.richrich", 24, new Color(0.7f, 0.75f, 0.85f), FontStyle.Normal, TextAnchor.MiddleLeft);
             SetRect(pkg.gameObject, 0, 0.40f, 1, 0.48f, 20, 0, -20, 0);
@@ -1061,6 +1078,8 @@ namespace RichRich.Editor
             // Dim Backdrop
             var backdrop = CreatePanel("Backdrop", modalRoot, new Color(0.02f, 0.04f, 0.08f, 0.92f));
             StretchFull(backdrop);
+            var backdropBtn = backdrop.AddComponent<Button>();
+            backdropBtn.transition = Selectable.Transition.None;
 
             // Dialog Window
             var dialog = CreatePanel("Dialog", modalRoot, new Color(0.09f, 0.13f, 0.22f, 1.0f));
@@ -1070,21 +1089,59 @@ namespace RichRich.Editor
             var header = CreatePanel("Header", dialog, new Color(0.12f, 0.18f, 0.30f, 1.0f));
             SetRect(header, 0, 1, 1, 1, 0, -90, 0, 0);
 
-            var titleText = CreateText("Title", header, title, 32, new Color(0.95f, 0.8f, 0.2f), FontStyle.Bold, TextAnchor.MiddleLeft);
-            SetRect(titleText.gameObject, 0, 0, 0.8f, 1, 24, 0, 0, 0);
+            var titleText = CreateText("Title", header, title, 30, new Color(0.95f, 0.8f, 0.2f), FontStyle.Bold, TextAnchor.MiddleLeft);
+            SetRect(titleText.gameObject, 0, 0, 0.68f, 1, 24, 0, 0, 0);
 
-            closeButton = CreateButton("CloseBtn", header, "✕", new Color(0.75f, 0.25f, 0.25f), Color.white);
-            SetRect(closeButton.gameObject, 0.85f, 0.15f, 0.98f, 0.85f, 0, 0, 0, 0);
+            closeButton = CreateButton("BackBtn", header, "← Back", new Color(0.75f, 0.22f, 0.22f), Color.white);
+            SetRect(closeButton.gameObject, 0.70f, 0.15f, 0.98f, 0.85f, 0, 0, 0, 0);
 
-            // Wire close button to dismiss dialog
-            var capturedModal = modalRoot;
-            closeButton.onClick.AddListener(() => capturedModal.SetActive(false));
+            // Attach ModalSheetView component to handle close and backdrop clicks
+            var sheetView = modalRoot.AddComponent<ModalSheetView>();
+            sheetView.BindButtons(closeButton, backdropBtn);
 
             // Content Panel
             var content = CreateUIObject("Content", dialog);
             SetRect(content, 0, 0, 1, 1, 0, 0, 0, -95);
 
             return modalRoot;
+        }
+
+        private static GameObject CreateExitConfirmDialog(GameObject parent, out Button cancelBtn, out Button confirmBtn)
+        {
+            var exitRoot = CreateUIObject("ExitConfirmDialog", parent);
+            StretchFull(exitRoot);
+            exitRoot.SetActive(false);
+
+            // Dim Backdrop
+            var backdrop = CreatePanel("Backdrop", exitRoot, new Color(0.01f, 0.02f, 0.05f, 0.95f));
+            StretchFull(backdrop);
+            var backdropBtn = backdrop.AddComponent<Button>();
+            backdropBtn.transition = Selectable.Transition.None;
+
+            // Centered Dialog Box
+            var dialog = CreatePanel("Dialog", exitRoot, new Color(0.09f, 0.13f, 0.22f, 1.0f));
+            SetRect(dialog, 0.08f, 0.36f, 0.92f, 0.64f, 0, 0, 0, 0);
+
+            // Title
+            var title = CreateText("Title", dialog, "Exit RichRich?", 36, new Color(0.95f, 0.8f, 0.2f), FontStyle.Bold, TextAnchor.MiddleCenter);
+            SetRect(title.gameObject, 0, 0.70f, 1, 0.95f, 0, 0, 0, 0);
+
+            // Message
+            var msg = CreateText("Message", dialog, "Are you sure you want to quit the game?\nYour life simulation progress is safely saved.", 24, Color.white, FontStyle.Normal, TextAnchor.MiddleCenter);
+            SetRect(msg.gameObject, 0.05f, 0.38f, 0.95f, 0.70f, 0, 0, 0, 0);
+
+            // Cancel Button
+            cancelBtn = CreateButton("CancelBtn", dialog, "Cancel", new Color(0.14f, 0.35f, 0.25f), Color.white);
+            SetRect(cancelBtn.gameObject, 0.08f, 0.10f, 0.46f, 0.32f, 0, 0, 0, 0);
+
+            // Exit Game Button
+            confirmBtn = CreateButton("ExitBtn", dialog, "Exit Game", new Color(0.75f, 0.22f, 0.22f), Color.white);
+            SetRect(confirmBtn.gameObject, 0.54f, 0.10f, 0.92f, 0.32f, 0, 0, 0, 0);
+
+            // Clicking backdrop dismisses exit dialog
+            backdropBtn.onClick.AddListener(() => ModalManager.Instance?.DismissExitDialog());
+
+            return exitRoot;
         }
 
         private static void StretchFull(GameObject go)

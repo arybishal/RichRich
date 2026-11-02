@@ -17,10 +17,10 @@ namespace RichRich.Editor
     {
         public const string PackageIdentifier = "com.bishal.richrich";
         public const string ApplicationName = "RichRich";
-        public const string VersionName = "0.1.1";
-        public const int VersionCode = 2;
+        public const string VersionName = "0.1.2";
+        public const int VersionCode = 3;
         public const string DefaultScenePath = "Assets/Scenes/MainGameplay.unity";
-        public const string DefaultOutputPath = "Builds/Android/RichRich-v0.1.1-android-arm64.apk";
+        public const string DefaultOutputPath = "Builds/Android/RichRich-v0.1.2-android-arm64.apk";
 
         [MenuItem("RichRich/Build Android Release APK")]
         public static void BuildAndroidRelease()
@@ -103,6 +103,9 @@ namespace RichRich.Editor
                 EditorPrefs.SetString("AndroidNDKRoot", ndkDir);
                 EditorPrefs.SetString("AndroidNDKPath", ndkDir);
                 EditorPrefs.SetString("NdkPath", ndkDir);
+                Environment.SetEnvironmentVariable("ANDROID_NDK_ROOT", ndkDir);
+                Environment.SetEnvironmentVariable("NDK_ROOT", ndkDir);
+                Environment.SetEnvironmentVariable("ANDROID_NDK_HOME", ndkDir);
             }
             if (Directory.Exists(@"C:\Program Files\Microsoft\jdk-17.0.20.101-hotspot"))
             {

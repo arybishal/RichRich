@@ -293,6 +293,14 @@ namespace RichRich.Presentation.Views
                 canvasGo = canvas.gameObject;
             }
 
+            // 3.5 Ensure ModalManager exists
+            if (FindObjectOfType<ModalManager>() == null)
+            {
+                var modalMgrGo = new GameObject("ModalManager");
+                modalMgrGo.transform.SetParent(canvasGo.transform, false);
+                modalMgrGo.AddComponent<ModalManager>();
+            }
+
             // 4. Construct Runtime Fallback HUD
             var fallbackGo = new GameObject("RuntimeFallbackHUD", typeof(RectTransform));
             fallbackGo.transform.SetParent(canvasGo.transform, false);

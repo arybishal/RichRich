@@ -35,7 +35,7 @@ namespace RichRich.Tests
         public void SettingsModalController_Reports_CorrectVersionAndPackageId()
         {
             var controller = new SettingsModalController();
-            Assert.That(controller.VersionText, Does.Contain("0.1.1"));
+            Assert.That(controller.VersionText, Does.Contain("0.1.2"));
             Assert.That(controller.PackageIdText, Is.EqualTo("com.bishal.richrich"));
         }
 

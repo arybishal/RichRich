@@ -35,6 +35,12 @@ namespace RichRich.Presentation.Views
         [SerializeField] private Button _sellButton;
         [SerializeField] private Text _feedbackText;
 
+        [Header("Nested Enterprise Subsystems")]
+        [SerializeField] private Button _navStaffButton;
+        [SerializeField] private GameObject _staffModalRoot;
+        [SerializeField] private Button _navFinanceButton;
+        [SerializeField] private GameObject _financeModalRoot;
+
         private BusinessDashboardController _controller;
 
         public void Bind(BusinessDashboardController controller)
@@ -53,7 +59,28 @@ namespace RichRich.Presentation.Views
             if (_sellButton != null)
                 _sellButton.onClick.AddListener(() => _controller.TrySellSelected(out _, out _));
 
+            if (_navStaffButton != null && _staffModalRoot != null)
+                _navStaffButton.onClick.AddListener(() => ModalManager.Instance?.PushChild(_staffModalRoot));
+            if (_navFinanceButton != null && _financeModalRoot != null)
+                _navFinanceButton.onClick.AddListener(() => ModalManager.Instance?.PushChild(_financeModalRoot));
+
             RefreshUI();
+        }
+
+        public void BindNestedModals(GameObject staffModalRoot, GameObject financeModalRoot)
+        {
+            _staffModalRoot = staffModalRoot;
+            _financeModalRoot = financeModalRoot;
+            if (_navStaffButton != null && _staffModalRoot != null)
+            {
+                _navStaffButton.onClick.RemoveAllListeners();
+                _navStaffButton.onClick.AddListener(() => ModalManager.Instance?.PushChild(_staffModalRoot));
+            }
+            if (_navFinanceButton != null && _financeModalRoot != null)
+            {
+                _navFinanceButton.onClick.RemoveAllListeners();
+                _navFinanceButton.onClick.AddListener(() => ModalManager.Instance?.PushChild(_financeModalRoot));
+            }
         }
 
         private void RefreshUI()

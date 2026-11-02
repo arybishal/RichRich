@@ -1,18 +1,18 @@
-# RichRich v0.1.1 Release Pipeline Execution Script
+# RichRich v0.1.2 Release Pipeline Execution Script
 $ErrorActionPreference = "Continue"
 
 Write-Host "====================================================" -ForegroundColor Cyan
-Write-Host " RichRich v0.1.1: Android Build & Release Pipeline " -ForegroundColor Cyan
+Write-Host " RichRich v0.1.2: Android Build & Release Pipeline " -ForegroundColor Cyan
 Write-Host "====================================================" -ForegroundColor Cyan
 
 $unityExe = "D:\unity6\Editor\Unity.exe"
 $projectDir = "D:\Webapp\RichyRich\RichRich_Unity"
 $outputDir = "D:\Webapp\RichyRich\Builds\Android"
-$outputApk = "$outputDir\RichRich-v0.1.1-android-arm64.apk"
-$buildLog = "$outputDir\build_v0.1.1.log"
+$outputApk = "$outputDir\RichRich-v0.1.2-android-arm64.apk"
+$buildLog = "$outputDir\build_v0.1.2.log"
 $licenseLog = "$outputDir\license_test.log"
 $repo = "arybishal/RichRich"
-$releaseTag = "v0.1.1"
+$releaseTag = "v0.1.2"
 $deviceSerial = "3B15B800NRT00000"
 
 # Configure environment variables for Android toolchain
