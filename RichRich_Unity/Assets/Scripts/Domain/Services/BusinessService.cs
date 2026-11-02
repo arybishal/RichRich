@@ -323,7 +323,7 @@ namespace RichRich.Domain.Services
 
         public void UpdateBalanceSheetAssets()
         {
-            FinancialService.BalanceSheet.UpdateNonCashAssets(TotalBusinessValuation);
+            FinancialService.BalanceSheet.UpdateBusinessAssets(TotalBusinessValuation);
         }
 
         #region State Restoration

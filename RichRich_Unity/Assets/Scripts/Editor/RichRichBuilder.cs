@@ -17,10 +17,10 @@ namespace RichRich.Editor
     {
         public const string PackageIdentifier = "com.bishal.richrich";
         public const string ApplicationName = "RichRich";
-        public const string VersionName = "0.1.2";
-        public const int VersionCode = 3;
+        public const string VersionName = "0.1.3";
+        public const int VersionCode = 4;
         public const string DefaultScenePath = "Assets/Scenes/MainGameplay.unity";
-        public const string DefaultOutputPath = "Builds/Android/RichRich-v0.1.2-android-arm64.apk";
+        public const string DefaultOutputPath = "Builds/Android/RichRich-v0.1.3-android-arm64.apk";
 
         [MenuItem("RichRich/Build Android Release APK")]
         public static void BuildAndroidRelease()

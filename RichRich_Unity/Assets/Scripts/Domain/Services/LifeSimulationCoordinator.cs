@@ -28,6 +28,7 @@ namespace RichRich.Domain.Services
         public LoanService LoanService { get; private set; }
         public LifestyleService LifestyleService { get; private set; }
         public BusinessService BusinessService { get; private set; }
+        public RealEstateService RealEstateService { get; private set; }
         public FinancialHealthService HealthService { get; private set; }
         public ISaveDataService SaveService { get; }
 
@@ -236,7 +237,61 @@ namespace RichRich.Domain.Services
                 }
             }
 
+            // 11. Real Estate & Property Investments (Schema 5)
+            List<RealEstateProperty> propList = RealEstateProperty.GetDefaultMarketplace();
+            if (save.Properties != null && save.Properties.Count > 0)
+            {
+                foreach (var pSnap in save.Properties)
+                {
+                    var existing = propList.FirstOrDefault(p => p.Id == pSnap.Id);
+                    if (existing != null && pSnap.IsOwned)
+                    {
+                        Mortgage restoredMortgage = null;
+                        if (pSnap.Mortgage != null)
+                        {
+                            restoredMortgage = new Mortgage(
+                                pSnap.Mortgage.Id,
+                                pSnap.Mortgage.PropertyId,
+                                Currency.FromCents(pSnap.Mortgage.OriginalPrincipalCents),
+                                pSnap.Mortgage.AnnualInterestRate,
+                                pSnap.Mortgage.TermMonths,
+                                Currency.FromCents(pSnap.Mortgage.RemainingPrincipalCents),
+                                pSnap.Mortgage.MonthsRemaining,
+                                pSnap.Mortgage.PaymentsMade
+                            );
+                        }
+
+                        var restoredProp = new RealEstateProperty(
+                            existing.Id,
+                            existing.Name,
+                            existing.Type,
+                            existing.PurchasePrice,
+                            currentValuation: Currency.FromCents(pSnap.CurrentValuationCents),
+                            downPaymentPercent: pSnap.DownPaymentPercent,
+                            condition: pSnap.Condition,
+                            baseMonthlyRent: existing.BaseMonthlyRent,
+                            monthlyMaintenanceCost: Currency.FromCents(pSnap.MonthlyMaintenanceCostCents),
+                            annualAppreciationRate: existing.AnnualAppreciationRate,
+                            isOwned: true,
+                            isRented: pSnap.IsRented,
+                            tenantMonthlyRent: Currency.FromCents(pSnap.TenantMonthlyRentCents),
+                            mortgage: restoredMortgage
+                        );
+
+                        int idx = propList.IndexOf(existing);
+                        propList[idx] = restoredProp;
+                    }
+                }
+            }
+
+            RealEstateService = new RealEstateService(Wallet, Ledger, FinancialService, Clock, propList);
+            if (HealthService != null)
+            {
+                HealthService.RealEstateService = RealEstateService;
+            }
+
             BusinessService.UpdateBalanceSheetAssets();
+            RealEstateService.UpdateBalanceSheet();
         }
 
         public void Tick(double deltaRealSeconds)
@@ -254,7 +309,7 @@ namespace RichRich.Domain.Services
             var autoRepair = BusinessService?.GetBusiness("auto_repair");
             var save = new SaveData
             {
-                SchemaVersion = 4,
+                SchemaVersion = 5,
                 CreatedAtUnix = _createdAtUnix != 0 ? _createdAtUnix : DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
                 LastSavedUnix = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
                 Difficulty = Difficulty.ToString(),
@@ -349,6 +404,33 @@ namespace RichRich.Domain.Services
                     IsCompleted = b.CurrentJob.IsCompleted,
                     AssignedBayIndex = b.BayId
                 }).ToList() ?? new List<AutoRepairJobSaveSnapshot>(),
+                Properties = RealEstateService?.AllProperties.Select(p => new PropertySaveSnapshot
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Type = p.Type.ToString(),
+                    PurchasePriceCents = p.PurchasePrice.MinorUnits,
+                    CurrentValuationCents = p.CurrentValuation.MinorUnits,
+                    DownPaymentPercent = p.DownPaymentPercent,
+                    Condition = p.Condition,
+                    BaseMonthlyRentCents = p.BaseMonthlyRent.MinorUnits,
+                    TenantMonthlyRentCents = p.TenantMonthlyRent.MinorUnits,
+                    MonthlyMaintenanceCostCents = p.MonthlyMaintenanceCost.MinorUnits,
+                    AnnualAppreciationRate = p.AnnualAppreciationRate,
+                    IsOwned = p.IsOwned,
+                    IsRented = p.IsRented,
+                    Mortgage = p.Mortgage != null ? new MortgageSaveSnapshot
+                    {
+                        Id = p.Mortgage.Id,
+                        PropertyId = p.Mortgage.PropertyId,
+                        OriginalPrincipalCents = p.Mortgage.OriginalPrincipal.MinorUnits,
+                        RemainingPrincipalCents = p.Mortgage.RemainingPrincipal.MinorUnits,
+                        AnnualInterestRate = p.Mortgage.AnnualInterestRate,
+                        TermMonths = p.Mortgage.TermMonths,
+                        MonthsRemaining = p.Mortgage.MonthsRemaining,
+                        PaymentsMade = p.Mortgage.PaymentsMade
+                    } : null
+                }).ToList() ?? new List<PropertySaveSnapshot>(),
                 CurrentLevel = 1,
                 Tickets = EconomyConfig.StartingTickets,
                 BusinessId = "auto_repair",

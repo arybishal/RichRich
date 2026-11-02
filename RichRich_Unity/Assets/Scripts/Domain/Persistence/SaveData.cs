@@ -84,16 +84,48 @@ namespace RichRich.Domain.Persistence
         public int AssignedBayIndex { get; set; }
     }
 
+    [Serializable]
+    public class MortgageSaveSnapshot
+    {
+        public string Id { get; set; }
+        public string PropertyId { get; set; }
+        public long OriginalPrincipalCents { get; set; }
+        public long RemainingPrincipalCents { get; set; }
+        public double AnnualInterestRate { get; set; }
+        public int TermMonths { get; set; }
+        public int MonthsRemaining { get; set; }
+        public int PaymentsMade { get; set; }
+    }
+
+    [Serializable]
+    public class PropertySaveSnapshot
+    {
+        public string Id { get; set; }
+        public string Name { get; set; }
+        public string Type { get; set; }
+        public long PurchasePriceCents { get; set; }
+        public long CurrentValuationCents { get; set; }
+        public double DownPaymentPercent { get; set; }
+        public double Condition { get; set; }
+        public long BaseMonthlyRentCents { get; set; }
+        public long TenantMonthlyRentCents { get; set; }
+        public long MonthlyMaintenanceCostCents { get; set; }
+        public double AnnualAppreciationRate { get; set; }
+        public bool IsOwned { get; set; }
+        public bool IsRented { get; set; }
+        public MortgageSaveSnapshot Mortgage { get; set; }
+    }
+
     /// <summary>
     /// Versioned, portable save schema for RichRich Life & Wealth Simulation.
-    /// Schema Version 4 supports Entrepreneurship & Business Ownership (Auto Repair, Convenience Store, Digital Agency, Employees, Inventory, Contracts).
-    /// Backward-compatible with Schema 1, 2, and 3.
+    /// Schema Version 5 supports Real Estate & Property Investments, Mortgages, and Rental Portfolios.
+    /// Backward-compatible with Schema 1, 2, 3, and 4.
     /// Serializes to clean human-readable JSON with zero personal data.
     /// </summary>
     [Serializable]
     public class SaveData
     {
-        public int SchemaVersion { get; set; } = 4;
+        public int SchemaVersion { get; set; } = 5;
         public long CreatedAtUnix { get; set; }
         public long LastSavedUnix { get; set; }
 
@@ -139,6 +171,9 @@ namespace RichRich.Domain.Persistence
         public List<AgencyProjectSaveSnapshot> AgencyProjects { get; set; } = new List<AgencyProjectSaveSnapshot>();
         public List<AutoRepairJobSaveSnapshot> ActiveRepairJobs { get; set; } = new List<AutoRepairJobSaveSnapshot>();
 
+        // Real Estate & Property Investments (Schema 5)
+        public List<PropertySaveSnapshot> Properties { get; set; } = new List<PropertySaveSnapshot>();
+
         // Legacy / Schema 1 Fields (Preserved for backwards compatibility)
         public int CurrentLevel { get; set; } = 1;
         public int Tickets { get; set; } = EconomyConfig.StartingTickets;
@@ -156,7 +191,7 @@ namespace RichRich.Domain.Persistence
             Currency startCash = GameStartConfig.GetStartingCash(difficulty);
             return new SaveData
             {
-                SchemaVersion = 4,
+                SchemaVersion = 5,
                 CreatedAtUnix = currentUnix,
                 LastSavedUnix = currentUnix,
                 Difficulty = difficulty.ToString(),
@@ -172,6 +207,7 @@ namespace RichRich.Domain.Persistence
                 StoreInventory = new List<StoreProductSaveSnapshot>(),
                 AgencyProjects = new List<AgencyProjectSaveSnapshot>(),
                 ActiveRepairJobs = new List<AutoRepairJobSaveSnapshot>(),
+                Properties = new List<PropertySaveSnapshot>(),
                 CurrentJobId = null,
                 TotalMonthsWorked = 0,
                 CurrentJobTenureMonths = 0,

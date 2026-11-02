@@ -71,6 +71,10 @@ namespace RichRich.Presentation.Views
         [SerializeField] private Button _businessFinanceOpenButton;
         [SerializeField] private GameObject _businessFinanceModalRoot;
 
+        [Header("Real Estate & Properties")]
+        [SerializeField] private Button _realEstateOpenButton;
+        [SerializeField] private GameObject _realEstateModalRoot;
+
         [Header("Settings")]
         [SerializeField] private Button _settingsOpenButton;
         [SerializeField] private GameObject _settingsModalRoot;
@@ -156,6 +160,11 @@ namespace RichRich.Presentation.Views
             if (_businessFinanceOpenButton != null && _businessFinanceModalRoot != null)
             {
                 _businessFinanceOpenButton.onClick.AddListener(() => OpenRootModal(_businessFinanceModalRoot));
+            }
+
+            if (_realEstateOpenButton != null && _realEstateModalRoot != null)
+            {
+                _realEstateOpenButton.onClick.AddListener(() => OpenRootModal(_realEstateModalRoot));
             }
 
             if (_settingsOpenButton != null && _settingsModalRoot != null)

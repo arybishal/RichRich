@@ -165,7 +165,7 @@ namespace RichRich.Editor
 
             // --- Navigation Buttons Panel (Grid of Subsystem Modals) ---
             var navPanel = CreatePanel("NavGridPanel", scrollRoot, new Color(0.07f, 0.10f, 0.18f, 0.85f));
-            SetRect(navPanel, 0, 0, 1, 1, 0, 0, 0, -575);
+            SetRect(navPanel, 0, 0, 1, 1, 0, 0, 0, -645);
 
             var gridTitle = CreateText("GridTitle", navPanel, "Simulated Subsystems & Enterprise Portals", 26, new Color(0.60f, 0.70f, 0.85f), FontStyle.Bold, TextAnchor.UpperLeft);
             SetRect(gridTitle.gameObject, 0, 1, 1, 1, 24, -40, -24, -10);
@@ -187,7 +187,9 @@ namespace RichRich.Editor
             var staffBtn = CreateNavButton("NavStaffBtn", navPanel, "Recruitment & HR", 0.52f, 1, 1, 1, 5, -370, -10, -315);
 
             var finBtn = CreateNavButton("NavFinanceBtn", navPanel, "Commercial Debt & P&L", 0, 1, 0.48f, 1, 10, -435, -5, -380);
-            var setBtn = CreateNavButton("NavSettingsBtn", navPanel, "Settings & Persistence", 0.52f, 1, 1, 1, 5, -435, -10, -380);
+            var realEstateBtn = CreateNavButton("NavRealEstateBtn", navPanel, "Real Estate Portfolio", 0.52f, 1, 1, 1, 5, -435, -10, -380);
+
+            var setBtn = CreateNavButton("NavSettingsBtn", navPanel, "Settings & Persistence", 0, 1, 1, 1, 10, -500, -10, -445);
 
             // Wire MainHUDView serialized fields
             SetPrivateField(hudView, "_cashBalanceText", cashText);
@@ -268,12 +270,17 @@ namespace RichRich.Editor
             var finView = finModal.AddComponent<BusinessFinanceView>();
             BuildFinanceUI(finModal, finView);
 
-            // --- 7.12 Settings Modal ---
+            // --- 7.12 Real Estate & Property Portfolio Modal ---
+            var realEstateModal = CreateModalSheet("RealEstateModal", modalsRoot, "Real Estate & Property Portfolio", out var realEstateCloseBtn);
+            var realEstateView = realEstateModal.AddComponent<RealEstateView>();
+            BuildRealEstateUI(realEstateModal, realEstateView);
+
+            // --- 7.13 Settings Modal ---
             var setModal = CreateModalSheet("SettingsModal", modalsRoot, "Settings & Persistence", out var setCloseBtn);
             var setView = setModal.AddComponent<SettingsModalView>();
             BuildSettingsUI(setModal, setView, setCloseBtn);
 
-            // --- 7.13 Exit Confirmation Dialog ---
+            // --- 7.14 Exit Confirmation Dialog ---
             var exitDialog = CreateExitConfirmDialog(modalsRoot, out var exitCancelBtn, out var exitConfirmBtn);
             var modalManager = modalsRoot.GetComponent<ModalManager>();
             modalManager.BindExitDialog(exitDialog, exitCancelBtn, exitConfirmBtn);
@@ -315,6 +322,9 @@ namespace RichRich.Editor
             SetPrivateField(hudView, "_businessFinanceOpenButton", finBtn);
             SetPrivateField(hudView, "_businessFinanceModalRoot", finModal);
 
+            SetPrivateField(hudView, "_realEstateOpenButton", realEstateBtn);
+            SetPrivateField(hudView, "_realEstateModalRoot", realEstateModal);
+
             SetPrivateField(hudView, "_settingsOpenButton", setBtn);
             SetPrivateField(hudView, "_settingsModalRoot", setModal);
 
@@ -334,6 +344,7 @@ namespace RichRich.Editor
             SetPrivateField(bootstrapper, "_digitalAgencyView", agencyView);
             SetPrivateField(bootstrapper, "_employeeView", staffView);
             SetPrivateField(bootstrapper, "_financeView", finView);
+            SetPrivateField(bootstrapper, "_realEstateView", realEstateView);
             SetPrivateField(bootstrapper, "_settingsView", setView);
 
             // Mark objects dirty for serializer
@@ -350,6 +361,7 @@ namespace RichRich.Editor
             EditorUtility.SetDirty(agencyView);
             EditorUtility.SetDirty(staffView);
             EditorUtility.SetDirty(finView);
+            EditorUtility.SetDirty(realEstateView);
             EditorUtility.SetDirty(setView);
 
             // Save Scene
@@ -365,6 +377,11 @@ namespace RichRich.Editor
             {
                 Debug.LogError($"[RichRichSceneBuilder] FAILED to save scene at '{ScenePath}'.");
             }
+        }
+
+        public static void BuildMainGameplayScene()
+        {
+            BuildMainScene();
         }
 
         #region Modal Builders
@@ -969,6 +986,128 @@ namespace RichRich.Editor
             SetPrivateField(view, "_loan1ApplyButton", loanApply);
             SetPrivateField(view, "_activeDebtSummaryText", debtSum);
             SetPrivateField(view, "_repayEarlyButton", repayBtn);
+            SetPrivateField(view, "_feedbackText", feedback);
+        }
+
+        private static void BuildRealEstateUI(GameObject root, RealEstateView view)
+        {
+            var content = root.transform.Find("Dialog/Content").gameObject;
+
+            // 1. Portfolio Header
+            var valText = CreateText("TotalValuation", content, "Total Valuation: $0.00", 24, new Color(0.35f, 0.85f, 0.98f), FontStyle.Bold, TextAnchor.MiddleLeft);
+            SetRect(valText.gameObject, 0, 0.92f, 0.5f, 0.98f, 20, 0, 0, 0);
+
+            var debtText = CreateText("TotalDebt", content, "Mortgage Debt: $0.00", 24, new Color(0.95f, 0.45f, 0.45f), FontStyle.Bold, TextAnchor.MiddleRight);
+            SetRect(debtText.gameObject, 0.5f, 0.92f, 1, 0.98f, 0, 0, -20, 0);
+
+            var equityText = CreateText("TotalEquity", content, "Net Equity: $0.00", 24, new Color(0.98f, 0.85f, 0.35f), FontStyle.Bold, TextAnchor.MiddleLeft);
+            SetRect(equityText.gameObject, 0, 0.86f, 0.5f, 0.92f, 20, 0, 0, 0);
+
+            var cashText = CreateText("LiquidCash", content, "Liquid Cash: $0.00", 24, Color.white, FontStyle.Normal, TextAnchor.MiddleRight);
+            SetRect(cashText.gameObject, 0.5f, 0.86f, 1, 0.92f, 0, 0, -20, 0);
+
+            var yieldText = CreateText("MonthlyYield", content, "Net Monthly Yield: +$0.00/mo", 22, new Color(0.35f, 0.85f, 0.50f), FontStyle.Normal, TextAnchor.MiddleLeft);
+            SetRect(yieldText.gameObject, 0, 0.80f, 1, 0.86f, 20, 0, -20, 0);
+
+            // 2. Property Selector Tabs / Buttons (5 properties)
+            var p1Btn = CreateButton("PropStarterBtn", content, "Oakwood Starter", new Color(0.18f, 0.28f, 0.42f), Color.white);
+            SetRect(p1Btn.gameObject, 0.02f, 0.73f, 0.32f, 0.79f, 0, 0, 0, 0);
+
+            var p2Btn = CreateButton("PropDuplexBtn", content, "Metro Duplex", new Color(0.18f, 0.28f, 0.42f), Color.white);
+            SetRect(p2Btn.gameObject, 0.35f, 0.73f, 0.65f, 0.79f, 0, 0, 0, 0);
+
+            var p3Btn = CreateButton("PropRetailBtn", content, "Retail Strip", new Color(0.18f, 0.28f, 0.42f), Color.white);
+            SetRect(p3Btn.gameObject, 0.68f, 0.73f, 0.98f, 0.79f, 0, 0, 0, 0);
+
+            var p4Btn = CreateButton("PropLuxuryBtn", content, "Luxury Penthouse", new Color(0.18f, 0.28f, 0.42f), Color.white);
+            SetRect(p4Btn.gameObject, 0.02f, 0.66f, 0.48f, 0.72f, 0, 0, 0, 0);
+
+            var p5Btn = CreateButton("PropPlazaBtn", content, "Financial Plaza", new Color(0.18f, 0.28f, 0.42f), Color.white);
+            SetRect(p5Btn.gameObject, 0.52f, 0.66f, 0.98f, 0.72f, 0, 0, 0, 0);
+
+            // 3. Selected Property Card
+            var propName = CreateText("PropName", content, "Oakwood Suburban Starter", 26, Color.white, FontStyle.Bold, TextAnchor.MiddleLeft);
+            SetRect(propName.gameObject, 0, 0.58f, 0.65f, 0.65f, 20, 0, 0, 0);
+
+            var propType = CreateText("PropType", content, "Category: ResidentialStarter", 22, new Color(0.70f, 0.75f, 0.85f), FontStyle.Normal, TextAnchor.MiddleRight);
+            SetRect(propType.gameObject, 0.65f, 0.58f, 1, 0.65f, 0, 0, -20, 0);
+
+            var propStatus = CreateText("PropStatus", content, "Status: [FOR SALE ON MARKET]", 24, new Color(0.95f, 0.75f, 0.25f), FontStyle.Bold, TextAnchor.MiddleLeft);
+            SetRect(propStatus.gameObject, 0, 0.52f, 0.5f, 0.58f, 20, 0, 0, 0);
+
+            var propCond = CreateText("PropCondition", content, "Building Condition: 100.0%", 22, new Color(0.35f, 0.85f, 0.50f), FontStyle.Normal, TextAnchor.MiddleRight);
+            SetRect(propCond.gameObject, 0.5f, 0.52f, 1, 0.58f, 0, 0, -20, 0);
+
+            var propVal = CreateText("PropValuation", content, "Current Valuation: $65,000.00", 22, Color.white, FontStyle.Normal, TextAnchor.MiddleLeft);
+            SetRect(propVal.gameObject, 0, 0.46f, 0.5f, 0.52f, 20, 0, 0, 0);
+
+            var propPrice = CreateText("PropPrice", content, "Price: $65,000.00", 22, Color.white, FontStyle.Normal, TextAnchor.MiddleRight);
+            SetRect(propPrice.gameObject, 0.5f, 0.46f, 1, 0.52f, 0, 0, -20, 0);
+
+            var downPay = CreateText("PropDownPayment", content, "Down Payment (20%): $13,000.00", 22, new Color(0.35f, 0.80f, 0.98f), FontStyle.Normal, TextAnchor.MiddleLeft);
+            SetRect(downPay.gameObject, 0, 0.40f, 1, 0.46f, 20, 0, -20, 0);
+
+            var rentText = CreateText("PropRent", content, "Tenant: Vacant (Market: $650.00/mo)", 22, new Color(0.70f, 0.75f, 0.85f), FontStyle.Normal, TextAnchor.MiddleLeft);
+            SetRect(rentText.gameObject, 0, 0.34f, 0.55f, 0.40f, 20, 0, 0, 0);
+
+            var maintText = CreateText("PropMaint", content, "Routine Maintenance: $65.00/mo", 22, new Color(0.95f, 0.45f, 0.45f), FontStyle.Normal, TextAnchor.MiddleRight);
+            SetRect(maintText.gameObject, 0.55f, 0.34f, 1, 0.40f, 0, 0, -20, 0);
+
+            var mortgageText = CreateText("PropMortgage", content, "Mortgage: None (Free & Clear)", 22, new Color(0.35f, 0.85f, 0.50f), FontStyle.Normal, TextAnchor.MiddleLeft);
+            SetRect(mortgageText.gameObject, 0, 0.28f, 1, 0.34f, 20, 0, -20, 0);
+
+            // 4. Action Buttons
+            var buyCashBtn = CreateButton("BuyCashBtn", content, "Buy Outright (Cash)", new Color(0.12f, 0.55f, 0.35f), Color.white);
+            SetRect(buyCashBtn.gameObject, 0.02f, 0.19f, 0.48f, 0.26f, 0, 0, 0, 0);
+
+            var buyMortBtn = CreateButton("BuyMortgageBtn", content, "Finance with Mortgage", new Color(0.18f, 0.45f, 0.75f), Color.white);
+            SetRect(buyMortBtn.gameObject, 0.52f, 0.19f, 0.98f, 0.26f, 0, 0, 0, 0);
+
+            var signTenantBtn = CreateButton("SignTenantBtn", content, "Sign Tenant Lease", new Color(0.20f, 0.55f, 0.45f), Color.white);
+            SetRect(signTenantBtn.gameObject, 0.02f, 0.11f, 0.32f, 0.18f, 0, 0, 0, 0);
+
+            var evictTenantBtn = CreateButton("EvictTenantBtn", content, "Evict Tenant", new Color(0.65f, 0.25f, 0.25f), Color.white);
+            SetRect(evictTenantBtn.gameObject, 0.02f, 0.11f, 0.32f, 0.18f, 0, 0, 0, 0);
+
+            var renovateBtn = CreateButton("RenovateBtn", content, "Renovate Property", new Color(0.55f, 0.45f, 0.20f), Color.white);
+            SetRect(renovateBtn.gameObject, 0.35f, 0.11f, 0.65f, 0.18f, 0, 0, 0, 0);
+
+            var sellBtn = CreateButton("SellBtn", content, "Liquidate / Sell", new Color(0.75f, 0.20f, 0.20f), Color.white);
+            SetRect(sellBtn.gameObject, 0.68f, 0.11f, 0.98f, 0.18f, 0, 0, 0, 0);
+
+            var feedback = CreateText("Feedback", content, "", 22, new Color(0.95f, 0.85f, 0.4f), FontStyle.Bold, TextAnchor.MiddleCenter);
+            SetRect(feedback.gameObject, 0, 0.02f, 1, 0.09f, 20, 0, -20, 0);
+
+            // Wire view private fields
+            SetPrivateField(view, "_totalValuationText", valText);
+            SetPrivateField(view, "_totalMortgageText", debtText);
+            SetPrivateField(view, "_totalEquityText", equityText);
+            SetPrivateField(view, "_monthlyCashFlowText", yieldText);
+            SetPrivateField(view, "_liquidCashText", cashText);
+
+            SetPrivateField(view, "_selectStarterButton", p1Btn);
+            SetPrivateField(view, "_selectDuplexButton", p2Btn);
+            SetPrivateField(view, "_selectRetailButton", p3Btn);
+            SetPrivateField(view, "_selectLuxuryButton", p4Btn);
+            SetPrivateField(view, "_selectPlazaButton", p5Btn);
+
+            SetPrivateField(view, "_propertyNameText", propName);
+            SetPrivateField(view, "_propertyTypeText", propType);
+            SetPrivateField(view, "_ownershipStatusText", propStatus);
+            SetPrivateField(view, "_valuationText", propVal);
+            SetPrivateField(view, "_conditionText", propCond);
+            SetPrivateField(view, "_purchasePriceText", propPrice);
+            SetPrivateField(view, "_downPaymentText", downPay);
+            SetPrivateField(view, "_rentalIncomeText", rentText);
+            SetPrivateField(view, "_maintenanceCostText", maintText);
+            SetPrivateField(view, "_mortgageStatusText", mortgageText);
+
+            SetPrivateField(view, "_buyCashButton", buyCashBtn);
+            SetPrivateField(view, "_buyMortgageButton", buyMortBtn);
+            SetPrivateField(view, "_signTenantButton", signTenantBtn);
+            SetPrivateField(view, "_evictTenantButton", evictTenantBtn);
+            SetPrivateField(view, "_renovateButton", renovateBtn);
+            SetPrivateField(view, "_sellButton", sellBtn);
             SetPrivateField(view, "_feedbackText", feedback);
         }
 

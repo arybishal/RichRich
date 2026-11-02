@@ -402,7 +402,7 @@ namespace RichRich.Tests
 
             // Save state
             var saved = _coordinator.SaveCurrentState();
-            Assert.That(saved.SchemaVersion, Is.EqualTo(4));
+            Assert.That(saved.SchemaVersion, Is.GreaterThanOrEqualTo(4));
             Assert.That(saved.Businesses.Count, Is.GreaterThanOrEqualTo(2));
             Assert.That(saved.Employees.Count, Is.EqualTo(1));
             Assert.That(saved.StoreInventory.Count, Is.GreaterThan(0));

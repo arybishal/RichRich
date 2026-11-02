@@ -43,6 +43,9 @@ namespace RichRich.Presentation.Views
         [SerializeField] private BusinessEmployeeView _employeeView;
         [SerializeField] private BusinessFinanceView _financeView;
 
+        [Header("Real Estate & Property Portfolio")]
+        [SerializeField] private RealEstateView _realEstateView;
+
         public LifeSimulationCoordinator LifeCoordinator { get; private set; }
         public LifeSimulationHUDController LifeHUDController { get; private set; }
         public GameSessionCoordinator LegacyCoordinator { get; private set; }
@@ -62,6 +65,7 @@ namespace RichRich.Presentation.Views
         public DigitalAgencyController DigitalAgencyController { get; private set; }
         public BusinessEmployeeController EmployeeController { get; private set; }
         public BusinessFinanceController FinanceController { get; private set; }
+        public RealEstateController RealEstateController { get; private set; }
 
         private SaveDataService _saveService;
 
@@ -206,6 +210,12 @@ namespace RichRich.Presentation.Views
                 FinanceController = new BusinessFinanceController(LifeCoordinator);
                 if (_financeView != null) _financeView.Bind(FinanceController);
             }, "Finance");
+
+            SafeBind(() =>
+            {
+                RealEstateController = new RealEstateController(LifeCoordinator);
+                if (_realEstateView != null) _realEstateView.Bind(RealEstateController);
+            }, "RealEstate");
 
             // Legacy views (only wired if specifically present, without overwriting Schema 4 save)
             if (_shopView != null || _taskView != null)

@@ -15,19 +15,22 @@ namespace RichRich.Domain.Services
         public CareerService CareerService { get; }
         public LoanService LoanService { get; }
         public BusinessService BusinessService { get; set; }
+        public RealEstateService RealEstateService { get; set; }
 
         public FinancialHealthService(
             FinancialService financialService,
             LivingExpenseService expenseService,
             CareerService careerService,
             LoanService loanService,
-            BusinessService businessService = null)
+            BusinessService businessService = null,
+            RealEstateService realEstateService = null)
         {
             FinancialService = financialService ?? throw new ArgumentNullException(nameof(financialService));
             ExpenseService = expenseService ?? throw new ArgumentNullException(nameof(expenseService));
             CareerService = careerService ?? throw new ArgumentNullException(nameof(careerService));
             LoanService = loanService ?? throw new ArgumentNullException(nameof(loanService));
             BusinessService = businessService;
+            RealEstateService = realEstateService;
         }
 
         public Currency ProjectedMonthlyIncome
@@ -39,10 +42,26 @@ namespace RichRich.Domain.Services
                 {
                     income += Math.Max(0, BusinessService.CalculateMonthlyNetProfit().MinorUnits);
                 }
+                if (RealEstateService != null)
+                {
+                    income += RealEstateService.TotalMonthlyRentalIncome.MinorUnits;
+                }
                 return Currency.FromCents(income);
             }
         }
-        public Currency ProjectedMonthlyExpenses => ExpenseService.TotalMonthlyBudget + LoanService.TotalMonthlyInstallments;
+
+        public Currency ProjectedMonthlyExpenses
+        {
+            get
+            {
+                long expenses = ExpenseService.TotalMonthlyBudget.MinorUnits + LoanService.TotalMonthlyInstallments.MinorUnits;
+                if (RealEstateService != null)
+                {
+                    expenses += RealEstateService.TotalMonthlyDebtService.MinorUnits + RealEstateService.TotalMonthlyMaintenance.MinorUnits;
+                }
+                return Currency.FromCents(expenses);
+            }
+        }
         public long ProjectedNetMonthlyCashFlowCents => (long)ProjectedMonthlyIncome.MinorUnits - (long)ProjectedMonthlyExpenses.MinorUnits;
         public bool HasNegativeCashFlow => ProjectedNetMonthlyCashFlowCents < 0;
 
