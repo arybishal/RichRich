@@ -1477,13 +1477,16 @@ namespace RichRich.Editor
             fillLight.intensity = 0.45f;
             fillLightGo.transform.rotation = Quaternion.Euler(30f, 145f, 0f);
 
+            RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
+            RenderSettings.ambientLight = new Color(0.20f, 0.24f, 0.35f);
+
             // 4. Ground Plaza & Asphalt Avenues
             var ground = GameObject.CreatePrimitive(PrimitiveType.Cube);
             ground.name = "PlazaGround";
             ground.transform.SetParent(cityParent.transform, false);
             ground.transform.position = new Vector3(0, -0.25f, 1.5f);
             ground.transform.localScale = new Vector3(24f, 0.5f, 22f);
-            ground.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial(new Color(0.06f, 0.08f, 0.14f));
+            ground.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial("Mat_PlazaGround", new Color(0.06f, 0.08f, 0.14f));
 
             // Central Boulevard (Horizontal)
             var roadH = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -1491,7 +1494,7 @@ namespace RichRich.Editor
             roadH.transform.SetParent(cityParent.transform, false);
             roadH.transform.position = new Vector3(0, 0.02f, 1.5f);
             roadH.transform.localScale = new Vector3(24f, 0.05f, 2.8f);
-            roadH.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial(new Color(0.11f, 0.14f, 0.22f));
+            roadH.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial("Mat_CentralBoulevard", new Color(0.11f, 0.14f, 0.22f));
 
             // Metro Avenue (Vertical)
             var roadV = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -1499,7 +1502,7 @@ namespace RichRich.Editor
             roadV.transform.SetParent(cityParent.transform, false);
             roadV.transform.position = new Vector3(0, 0.02f, 1.5f);
             roadV.transform.localScale = new Vector3(2.8f, 0.05f, 22f);
-            roadV.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial(new Color(0.11f, 0.14f, 0.22f));
+            roadV.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial("Mat_MetroAvenue", new Color(0.11f, 0.14f, 0.22f));
 
             // Dashed Road Markings (Horizontal Boulevard)
             for (int i = -4; i <= 4; i++)
@@ -1509,7 +1512,7 @@ namespace RichRich.Editor
                 dashH.transform.SetParent(cityParent.transform, false);
                 dashH.transform.position = new Vector3(i * 2.5f, 0.06f, 1.5f);
                 dashH.transform.localScale = new Vector3(1.2f, 0.02f, 0.20f);
-                dashH.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial(new Color(0.85f, 0.90f, 0.95f));
+                dashH.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial("Mat_RoadDashes", new Color(0.85f, 0.90f, 0.95f), new Color(0.40f, 0.45f, 0.50f));
                 GameObject.DestroyImmediate(dashH.GetComponent<Collider>());
             }
 
@@ -1521,7 +1524,7 @@ namespace RichRich.Editor
                 dashV.transform.SetParent(cityParent.transform, false);
                 dashV.transform.position = new Vector3(0f, 0.06f, 1.5f + i * 2.5f);
                 dashV.transform.localScale = new Vector3(0.20f, 0.02f, 1.2f);
-                dashV.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial(new Color(0.85f, 0.90f, 0.95f));
+                dashV.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial("Mat_RoadDashes", new Color(0.85f, 0.90f, 0.95f), new Color(0.40f, 0.45f, 0.50f));
                 GameObject.DestroyImmediate(dashV.GetComponent<Collider>());
             }
 
@@ -1653,7 +1656,7 @@ namespace RichRich.Editor
             tower.transform.SetParent(buildingRoot.transform, false);
             tower.transform.localPosition = new Vector3(0, towerScale.y * 0.5f, 0);
             tower.transform.localScale = towerScale;
-            tower.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial(bodyColor);
+            tower.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial($"Mat_{name}_Tower", bodyColor);
 
             // Crown / Spire
             var crown = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -1661,7 +1664,7 @@ namespace RichRich.Editor
             crown.transform.SetParent(buildingRoot.transform, false);
             crown.transform.localPosition = new Vector3(0, towerScale.y + 0.5f, 0);
             crown.transform.localScale = new Vector3(towerScale.x * 0.6f, 1.0f, towerScale.z * 0.6f);
-            crown.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial(accentColor);
+            crown.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial($"Mat_{name}_Crown", accentColor, accentColor * 0.40f);
 
             // Box Collider on buildingRoot covering both tower and crown
             var col = buildingRoot.AddComponent<BoxCollider>();
@@ -1687,7 +1690,7 @@ namespace RichRich.Editor
             trunk.transform.SetParent(treeGo.transform, false);
             trunk.transform.localPosition = new Vector3(0, 0.65f, 0);
             trunk.transform.localScale = new Vector3(0.32f, 1.3f, 0.32f);
-            trunk.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial(new Color(0.28f, 0.16f, 0.08f));
+            trunk.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial("Mat_TreeTrunk", new Color(0.28f, 0.16f, 0.08f));
             GameObject.DestroyImmediate(trunk.GetComponent<Collider>());
 
             // Foliage Low
@@ -1697,7 +1700,7 @@ namespace RichRich.Editor
             fol1.transform.localPosition = new Vector3(0, 1.7f, 0);
             fol1.transform.localScale = new Vector3(1.5f, 1.1f, 1.5f);
             fol1.transform.localRotation = Quaternion.Euler(0, 25f, 0);
-            fol1.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial(new Color(0.08f, 0.45f, 0.22f));
+            fol1.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial("Mat_TreeFoliage1", new Color(0.08f, 0.45f, 0.22f));
             GameObject.DestroyImmediate(fol1.GetComponent<Collider>());
 
             // Foliage High
@@ -1707,7 +1710,7 @@ namespace RichRich.Editor
             fol2.transform.localPosition = new Vector3(0, 2.4f, 0);
             fol2.transform.localScale = new Vector3(1.0f, 0.9f, 1.0f);
             fol2.transform.localRotation = Quaternion.Euler(0, 50f, 0);
-            fol2.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial(new Color(0.14f, 0.65f, 0.32f));
+            fol2.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial("Mat_TreeFoliage2", new Color(0.14f, 0.65f, 0.32f));
             GameObject.DestroyImmediate(fol2.GetComponent<Collider>());
         }
 
@@ -1723,7 +1726,7 @@ namespace RichRich.Editor
             post.transform.SetParent(lightGo.transform, false);
             post.transform.localPosition = new Vector3(0, 1.6f, 0);
             post.transform.localScale = new Vector3(0.12f, 3.2f, 0.12f);
-            post.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial(new Color(0.15f, 0.18f, 0.25f));
+            post.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial("Mat_StreetlightPost", new Color(0.15f, 0.18f, 0.25f));
             GameObject.DestroyImmediate(post.GetComponent<Collider>());
 
             // Arm
@@ -1732,7 +1735,7 @@ namespace RichRich.Editor
             arm.transform.SetParent(lightGo.transform, false);
             arm.transform.localPosition = new Vector3(0.25f, 3.1f, 0);
             arm.transform.localScale = new Vector3(0.55f, 0.08f, 0.12f);
-            arm.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial(new Color(0.15f, 0.18f, 0.25f));
+            arm.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial("Mat_StreetlightPost", new Color(0.15f, 0.18f, 0.25f));
             GameObject.DestroyImmediate(arm.GetComponent<Collider>());
 
             // Lamp Glow Head
@@ -1741,7 +1744,7 @@ namespace RichRich.Editor
             head.transform.SetParent(lightGo.transform, false);
             head.transform.localPosition = new Vector3(0.48f, 3.0f, 0);
             head.transform.localScale = new Vector3(0.24f, 0.14f, 0.20f);
-            head.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial(new Color(0.98f, 0.82f, 0.25f));
+            head.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial("Mat_StreetlightHead", new Color(0.98f, 0.82f, 0.25f), new Color(0.98f, 0.82f, 0.25f));
             GameObject.DestroyImmediate(head.GetComponent<Collider>());
         }
 
@@ -1774,7 +1777,7 @@ namespace RichRich.Editor
             torso.transform.SetParent(bodyRoot.transform, false);
             torso.transform.localPosition = Vector3.zero;
             torso.transform.localScale = new Vector3(0.50f, 0.60f, 0.32f);
-            torso.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial(new Color(0.08f, 0.52f, 0.78f));
+            torso.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial("Mat_AvatarTorso", new Color(0.08f, 0.52f, 0.78f));
             GameObject.DestroyImmediate(torso.GetComponent<Collider>());
 
             // Head
@@ -1783,7 +1786,7 @@ namespace RichRich.Editor
             head.transform.SetParent(bodyRoot.transform, false);
             head.transform.localPosition = new Vector3(0, 0.52f, 0);
             head.transform.localScale = new Vector3(0.36f, 0.36f, 0.36f);
-            head.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial(new Color(0.98f, 0.82f, 0.65f));
+            head.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial("Mat_AvatarHead", new Color(0.98f, 0.82f, 0.65f));
             GameObject.DestroyImmediate(head.GetComponent<Collider>());
 
             // Hair
@@ -1792,7 +1795,7 @@ namespace RichRich.Editor
             hair.transform.SetParent(head.transform, false);
             hair.transform.localPosition = new Vector3(0, 0.22f, -0.04f);
             hair.transform.localScale = new Vector3(1.05f, 0.35f, 1.05f);
-            hair.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial(new Color(0.12f, 0.15f, 0.22f));
+            hair.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial("Mat_AvatarHair", new Color(0.12f, 0.15f, 0.22f));
             GameObject.DestroyImmediate(hair.GetComponent<Collider>());
 
             // Left Arm
@@ -1801,7 +1804,7 @@ namespace RichRich.Editor
             leftArm.transform.SetParent(bodyRoot.transform, false);
             leftArm.transform.localPosition = new Vector3(-0.36f, 0, 0);
             leftArm.transform.localScale = new Vector3(0.16f, 0.52f, 0.16f);
-            leftArm.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial(new Color(0.08f, 0.52f, 0.78f));
+            leftArm.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial("Mat_AvatarTorso", new Color(0.08f, 0.52f, 0.78f));
             GameObject.DestroyImmediate(leftArm.GetComponent<Collider>());
 
             // Right Arm
@@ -1810,7 +1813,7 @@ namespace RichRich.Editor
             rightArm.transform.SetParent(bodyRoot.transform, false);
             rightArm.transform.localPosition = new Vector3(0.36f, 0, 0);
             rightArm.transform.localScale = new Vector3(0.16f, 0.52f, 0.16f);
-            rightArm.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial(new Color(0.08f, 0.52f, 0.78f));
+            rightArm.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial("Mat_AvatarTorso", new Color(0.08f, 0.52f, 0.78f));
             GameObject.DestroyImmediate(rightArm.GetComponent<Collider>());
 
             // Left Leg
@@ -1819,7 +1822,7 @@ namespace RichRich.Editor
             leftLeg.transform.SetParent(avatarGo.transform, false);
             leftLeg.transform.localPosition = new Vector3(-0.16f, 0.26f, 0);
             leftLeg.transform.localScale = new Vector3(0.18f, 0.52f, 0.18f);
-            leftLeg.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial(new Color(0.12f, 0.15f, 0.22f));
+            leftLeg.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial("Mat_AvatarPants", new Color(0.12f, 0.15f, 0.22f));
             GameObject.DestroyImmediate(leftLeg.GetComponent<Collider>());
 
             // Right Leg
@@ -1828,7 +1831,7 @@ namespace RichRich.Editor
             rightLeg.transform.SetParent(avatarGo.transform, false);
             rightLeg.transform.localPosition = new Vector3(0.16f, 0.26f, 0);
             rightLeg.transform.localScale = new Vector3(0.18f, 0.52f, 0.18f);
-            rightLeg.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial(new Color(0.12f, 0.15f, 0.22f));
+            rightLeg.GetComponent<Renderer>().sharedMaterial = CreateStylizedMaterial("Mat_AvatarPants", new Color(0.12f, 0.15f, 0.22f));
             GameObject.DestroyImmediate(rightLeg.GetComponent<Collider>());
 
             // Wire limb references into PlayerAvatarController
@@ -1841,16 +1844,51 @@ namespace RichRich.Editor
             return avatarGo;
         }
 
-        private static Material CreateStylizedMaterial(Color color)
+        private static Material CreateStylizedMaterial(string assetName, Color color, Color? emission = null)
         {
-            var shader = Shader.Find("Mobile/Diffuse")
+            const string folder = "Assets/Materials";
+            if (!AssetDatabase.IsValidFolder(folder))
+            {
+                AssetDatabase.CreateFolder("Assets", "Materials");
+            }
+
+            string path = $"{folder}/{assetName}.mat";
+            var shader = Shader.Find("RichRich/StylizedLit")
+                         ?? Shader.Find("Mobile/Diffuse")
                          ?? Shader.Find("Universal Render Pipeline/Lit")
                          ?? Shader.Find("Standard")
-                         ?? Shader.Find("Unlit/Color")
-                         ?? Shader.Find("Sprites/Default");
-            var mat = new Material(shader);
-            mat.color = color;
+                         ?? Shader.Find("Unlit/Color");
+
+            var mat = AssetDatabase.LoadAssetAtPath<Material>(path);
+            if (mat == null)
+            {
+                mat = new Material(shader);
+                mat.name = assetName;
+                mat.color = color;
+                if (emission.HasValue && mat.HasProperty("_Emission"))
+                {
+                    mat.SetColor("_Emission", emission.Value);
+                }
+                AssetDatabase.CreateAsset(mat, path);
+            }
+            else
+            {
+                mat.shader = shader;
+                mat.color = color;
+                if (emission.HasValue && mat.HasProperty("_Emission"))
+                {
+                    mat.SetColor("_Emission", emission.Value);
+                }
+                EditorUtility.SetDirty(mat);
+            }
+
             return mat;
+        }
+
+        private static Material CreateStylizedMaterial(Color color)
+        {
+            string hex = ColorUtility.ToHtmlStringRGB(color);
+            return CreateStylizedMaterial($"Mat_{hex}", color);
         }
 
         #endregion
