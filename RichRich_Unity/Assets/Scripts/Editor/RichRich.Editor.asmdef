@@ -3,7 +3,8 @@
     "rootNamespace": "RichRich.Editor",
     "references": [
         "RichRich.Domain",
-        "RichRich.Presentation"
+        "RichRich.Presentation",
+        "UnityEngine.UI"
     ],
     "includePlatforms": [
         "Editor"

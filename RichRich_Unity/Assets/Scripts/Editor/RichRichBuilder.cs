@@ -17,16 +17,19 @@ namespace RichRich.Editor
     {
         public const string PackageIdentifier = "com.bishal.richrich";
         public const string ApplicationName = "RichRich";
-        public const string VersionName = "0.1.0";
-        public const int VersionCode = 1;
+        public const string VersionName = "0.1.1";
+        public const int VersionCode = 2;
         public const string DefaultScenePath = "Assets/Scenes/MainGameplay.unity";
-        public const string DefaultOutputPath = "Builds/Android/RichRich-v0.1.0-android-arm64.apk";
+        public const string DefaultOutputPath = "Builds/Android/RichRich-v0.1.1-android-arm64.apk";
 
         [MenuItem("RichRich/Build Android Release APK")]
         public static void BuildAndroidRelease()
         {
             string outputPath = GetOutputPathArgument() ?? DefaultOutputPath;
             ConfigureAndroidPlayerSettings();
+
+            // Guarantee that MainGameplay scene contains camera, canvas, UI views, and bootstrapper
+            RichRichSceneBuilder.BuildMainScene();
 
             string[] scenes = GetBuildScenes();
             Debug.Log($"[RichRichBuilder] Starting Android Release APK Build...");
@@ -103,8 +106,15 @@ namespace RichRich.Editor
             }
             if (Directory.Exists(@"C:\Program Files\Microsoft\jdk-17.0.20.101-hotspot"))
             {
-                EditorPrefs.SetString("JdkPath", @"C:\Program Files\Microsoft\jdk-17.0.20.101-hotspot");
-                EditorPrefs.SetString("AndroidJavaPath", @"C:\Program Files\Microsoft\jdk-17.0.20.101-hotspot");
+                string jdk = @"C:\Program Files\Microsoft\jdk-17.0.20.101-hotspot";
+                EditorPrefs.SetString("JdkPath", jdk);
+                EditorPrefs.SetString("AndroidJdkPath", jdk);
+                EditorPrefs.SetString("AndroidJavaPath", jdk);
+                EditorPrefs.SetString("AndroidJavaSDKPath", jdk);
+                Environment.SetEnvironmentVariable("JAVA_HOME", jdk);
+                Environment.SetEnvironmentVariable("JDK_HOME", jdk);
+                string path = Environment.GetEnvironmentVariable("PATH") ?? "";
+                Environment.SetEnvironmentVariable("PATH", Path.Combine(jdk, "bin") + ";" + path);
             }
 
             PlayerSettings.productName = ApplicationName;

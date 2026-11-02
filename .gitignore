@@ -26,6 +26,7 @@ Desktop.ini
 .DS_Store
 
 # Unity editor and cache
+*.log
 [Ll]ogs/
 **/[Ll]ogs/
 [Uu]ser[Ss]ettings/

@@ -2,7 +2,8 @@
     "name": "RichRich.Presentation",
     "rootNamespace": "RichRich.Presentation",
     "references": [
-        "RichRich.Domain"
+        "RichRich.Domain",
+        "UnityEngine.UI"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

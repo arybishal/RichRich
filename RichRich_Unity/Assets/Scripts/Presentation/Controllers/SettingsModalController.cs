@@ -12,8 +12,8 @@ namespace RichRich.Presentation.Controllers
     {
         public bool SoundEnabled { get; private set; }
         public bool HapticsEnabled { get; private set; }
-        public string VersionText => "RichRich v0.2.0 (Phase 2 Vertical Slice)";
-        public string PackageIdText => "com.original.richrich";
+        public string VersionText => "RichRich v0.1.1";
+        public string PackageIdText => "com.bishal.richrich";
 
         public event Action OnSettingsChanged;
         public event Action OnSaveReset;

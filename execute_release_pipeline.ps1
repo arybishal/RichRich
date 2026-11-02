@@ -1,18 +1,18 @@
-# RichRich v0.1.0 Release Pipeline Execution Script
+# RichRich v0.1.1 Release Pipeline Execution Script
 $ErrorActionPreference = "Continue"
 
 Write-Host "====================================================" -ForegroundColor Cyan
-Write-Host " RichRich v0.1.0: Android Build & Release Pipeline " -ForegroundColor Cyan
+Write-Host " RichRich v0.1.1: Android Build & Release Pipeline " -ForegroundColor Cyan
 Write-Host "====================================================" -ForegroundColor Cyan
 
 $unityExe = "D:\unity6\Editor\Unity.exe"
 $projectDir = "D:\Webapp\RichyRich\RichRich_Unity"
 $outputDir = "D:\Webapp\RichyRich\Builds\Android"
-$outputApk = "$outputDir\RichRich-v0.1.0-android-arm64.apk"
-$buildLog = "$outputDir\build.log"
+$outputApk = "$outputDir\RichRich-v0.1.1-android-arm64.apk"
+$buildLog = "$outputDir\build_v0.1.1.log"
 $licenseLog = "$outputDir\license_test.log"
 $repo = "arybishal/RichRich"
-$releaseTag = "v0.1.0"
+$releaseTag = "v0.1.1"
 $deviceSerial = "3B15B800NRT00000"
 
 # Configure environment variables for Android toolchain
@@ -91,33 +91,46 @@ Write-Host "    SHA256: $apkHash"
 
 # Step 4: Sideload & Launch on Device (if available)
 Write-Host "`n[4/6] Checking connected Android devices..." -ForegroundColor Yellow
-$adbDevices = (adb devices) -join "`n"
-Write-Host "$adbDevices"
+$adbLines = (& adb devices) | Out-String
+Write-Host "$adbLines"
 
-$targetDevice = (adb devices | Where-Object { $_ -match "$deviceSerial\s+device" })
-if ($targetDevice) {
-    Write-Host "[+] Target device $deviceSerial is authorized and connected. Installing APK..." -ForegroundColor Green
-    & adb -s $deviceSerial install -r $outputApk
+$matchedSerial = $null
+if ($adbLines -match "($deviceSerial)\s+device") {
+    $matchedSerial = $matches[1]
+} elseif ($adbLines -match "([a-zA-Z0-9_\:\.]+)\s+device") {
+    $matchedSerial = $matches[1]
+}
+
+if ($matchedSerial) {
+    Write-Host "[+] Target device '$matchedSerial' is authorized and connected. Installing APK..." -ForegroundColor Green
+    & adb -s $matchedSerial install -r $outputApk
     if ($LASTEXITCODE -eq 0) {
         Write-Host "[+] Installation succeeded! Launching com.bishal.richrich..." -ForegroundColor Green
-        & adb -s $deviceSerial shell monkey -p com.bishal.richrich -c android.intent.category.LAUNCHER 1
+        & adb -s $matchedSerial shell monkey -p com.bishal.richrich -c android.intent.category.LAUNCHER 1
         Start-Sleep -Seconds 3
         Write-Host "`n--- Device Logcat (Unity / Runtime) ---"
-        & adb -s $deviceSerial logcat -d -s Unity:V AndroidRuntime:E
+        & adb -s $matchedSerial logcat -d -s Unity:V AndroidRuntime:E
     } else {
         Write-Host "[-] Device installation failed." -ForegroundColor Red
     }
 } else {
-    Write-Host "[*] Device $deviceSerial not detected or unauthorized. Skipping physical deployment." -ForegroundColor Yellow
+    Write-Host "[*] No authorized Android device detected. Skipping physical deployment." -ForegroundColor Yellow
 }
 
 # Step 5: Upload to GitHub Release
-Write-Host "`n[5/6] Uploading APK to GitHub Release $releaseTag..." -ForegroundColor Yellow
-& gh release upload $releaseTag $outputApk --repo $repo --clobber
+Write-Host "`n[5/6] Creating / Uploading APK to GitHub Release $releaseTag..." -ForegroundColor Yellow
+$releaseExists = & gh release view $releaseTag --repo $repo 2>&1
 if ($LASTEXITCODE -eq 0) {
-    Write-Host "[+] GitHub Release upload successful!" -ForegroundColor Green
+    Write-Host "Release $releaseTag already exists. Uploading artifact..." -ForegroundColor Yellow
+    & gh release upload $releaseTag $outputApk --repo $repo --clobber
 } else {
-    Write-Host "[-] GitHub Release upload failed." -ForegroundColor Red
+    Write-Host "Creating new GitHub Release $releaseTag..." -ForegroundColor Green
+    & gh release create $releaseTag $outputApk --repo $repo --title "RichRich v0.1.1: Android Black Screen Fix & Playable Release" --notes "Release v0.1.1 resolves the Android black screen issue by fully authoring and binding the MainGameplay scene hierarchy (Camera, Canvas, HUD, and 12 subsystem modals) and adding self-healing fallback UI and startup diagnostic recovery to GameBootstrapper."
+}
+if ($LASTEXITCODE -eq 0) {
+    Write-Host "[+] GitHub Release successful!" -ForegroundColor Green
+} else {
+    Write-Host "[-] GitHub Release failed." -ForegroundColor Red
     exit 1
 }
 
